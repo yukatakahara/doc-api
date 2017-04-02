@@ -3,147 +3,130 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"log"
 	"net/http"
+	"time"
+
+	jwt "github.com/dgrijalva/jwt-go"
 )
 
-func init() {
-	// GET /projects/  - list of projects
-	// POST /projects/ - create project
-	http.HandleFunc("/projects/", ProjectsHandler)
-	http.HandleFunc("/register", RegisterHandler)
+// Message struct represents the JSON document which the API sends when something wrong will happen.
+// Type: If this is an error message, "Error" or "Message" can be the two values.
+// UserMessage: This is the string which the developer can show to the user.
+// DeveloperMessage: This is the technical message.
+// DocumentationLink: If the message type is error, this will be the link to corresponding documentation.
+type Message struct {
+	Type              string `json:"messageType"`
+	UserMessage       string `json:"userMessage"`
+	DeveloperMessage  string `json:"developerMessage"`
+	DocumentationLink string `json:"documentationLink"`
+}
 
+type MyCustomClaims struct {
+	Username string `json:"username"`
+	jwt.StandardClaims
+}
+
+var mySigningKey = []byte("secret")
+
+func init() {
+	// POST /register - create jwt
+	http.HandleFunc("/register", GetTokenHandler)
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
 func main() {
 }
 
-type Project struct {
-	Id              int    `json:"id"`
-	Name            string `json:"name"`
-	Email           string `json:"email"`
-	EmployeeId      string `json:"employee_id"`
-	TeamName        string `json:"team_name"`
-	TeamEmail       string `json:"team_email"`
-	TeamEmployees   string `json:"team_employees"`
-	IdeaDescription string `json:"idea_description"`
+type User struct {
+	Email string `json:"email"`
+	JWT   string `json:"jwt"`
 }
 
-// our 'database' - for now it will be in memory but later on we'll save it in postgres
-// slice that each of it's elements is the Project struct
-var projects = []Project{
-	{1, "dan", "dan@gmail.com", "123", "cats", "cats@gmail.com", "josh, dan, lea", "instagram but for cats"},
-	{2, "laura", "laura@gmail.com", "143", "dogs", "dogs@gmail.com", "laura, josh", "social network for dogs"},
-}
-
-type Profile struct {
-	Name    string
-	Hobbies []string
-}
-
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	profile := Profile{"Alex", []string{"snowboarding", "programming"}}
-
-	js, err := json.Marshal(profile)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+//GetTokenHandler will get a token for the username and password
+func GetTokenHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "OPTIONS" {
+		ReturnMessageJSON(w, "Information", "", "")
 		return
 	}
 
+	if r.Method != "POST" {
+		ReturnMessageJSON(w, "Error", "Page not available", "GetTokenHandler only accepts a POST")
+		return
+	}
+
+	// r.ParseForm()
+	username := "josh"
+	password := "password123"
+	// log.Println(r.Form)
+
+	if username == "" || password == "" {
+		ReturnMessageJSON(w, "Error", "Invalid Username/Password", "Invalid Username or password in GetTokenHandler")
+		return
+	}
+
+	// if db.ValidUser(username, password) {
+	if true {
+		// Create the Claim which expires after EXPIRATION_HOURS hrs, default is 5.
+		claims := MyCustomClaims{
+			username,
+			jwt.StandardClaims{
+				ExpiresAt: time.Now().Add(time.Hour * 5).Unix(),
+			},
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+		/* Sign the token with our secret */
+		tokenString, err := token.SignedString(mySigningKey)
+		if err != nil {
+			log.Println("Something went wrong with signing token")
+			ReturnMessageJSON(w, "Error", "Authentication Failed", "Authentication Failed")
+
+			return
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token")
+		w.Header().Set("Content-Type", "application/json")
+
+		user := User{"josh@gmail.com", tokenString}
+
+		js, err := json.Marshal(user)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(js)
+
+		// w.Write([]byte(tokenString))
+	} else {
+		ReturnMessageJSON(w, "Error", "Authentication Failed", "Authentication Failed")
+	}
+}
+
+// ReturnMessageJSON is a wrapper which will send JSON document of type Message, it takes the following arguments
+// messageType: Error or Information, denotes if the message is just FYI or an error
+// userMessage: Message in terms of user
+// devMessage: Message in terms of Developer
+func ReturnMessageJSON(w http.ResponseWriter, messageType, userMessage, devMessage string) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token")
 	w.Header().Set("Content-Type", "application/json")
 
-	w.Write(js)
-}
-
-func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "POST":
-		addProject(w, r)
-	case "GET":
-		getProjects(w, r)
-	default:
-		http.Error(w, r.Method+" not allowed", http.StatusMethodNotAllowed)
-	}
-}
-
-func getProjects(w http.ResponseWriter, r *http.Request) {
-	// first we build the response
-	res := struct {
-		Projects []Project
-		Errors   []string
-	}{
-		projects,
-		[]string{""},
+	message := Message{Type: messageType, UserMessage: userMessage, DeveloperMessage: devMessage}
+	if messageType == "Information" {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	// then we encode it as JSON on the response
-	enc := json.NewEncoder(w)
-	err := enc.Encode(res)
-
-	// And if encoding fails we log the error
+	err := json.NewEncoder(w).Encode(message)
 	if err != nil {
-		fmt.Errorf("encode response: %v", err)
+		panic(err)
 	}
-}
-
-func addProject(w http.ResponseWriter, r *http.Request) {
-	// decode
-	// validate
-	// add
-	// return to client
-
-	p := &Project{}
-
-	if err := json.NewDecoder(r.Body).Decode(p); err != nil {
-		ServerError(w, err)
-		return
-	}
-
-	if err := validateProject(p); err != nil {
-		BadRequest(w, err)
-		return
-	}
-
-	if err := saveProject(&projects, p); err != nil {
-		BadRequest(w, errors.New("save error: "+err.Error()))
-		return
-	}
-
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-
-	// returns the new project - {"id":123,"name":""...}
-	json.NewEncoder(w).Encode(p)
-}
-
-// we should not use structs to validate a project since as soon as we'll have non-required fields,
-// the field appear as empty string. we should use map instead of struct.
-// m := make(map[string]string)  _, prs := m["Name"] => prs will be false if Name doesn't exist
-func validateProject(p *Project) error {
-	if p.Name == "" {
-		return fmt.Errorf("missing required fields: %s", "Name")
-	}
-
-	return nil
-}
-
-// save project to slice. eventualy it will save to a database
-func saveProject(projects *[]Project, p *Project) error {
-	*projects = append(*projects, *p)
-
-	return nil
-}
-
-func BadRequest(w http.ResponseWriter, err error) {
-	http.Error(w, err.Error(), http.StatusBadRequest)
-}
-
-func ServerError(w http.ResponseWriter, err error) {
-	http.Error(w, err.Error(), http.StatusInternalServerError)
+	return
 }

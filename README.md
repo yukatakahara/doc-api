@@ -6,6 +6,10 @@
 
 ## Endpoints
 
+### Register
+
+    curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"email":"foo@gmail.com","password":"password123"}' http://localhost:3000/register
+
 ### Get all projects
 
     curl 0.0.0.0:3000/projects/ | jq '.'
