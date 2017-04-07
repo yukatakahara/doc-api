@@ -30,8 +30,9 @@ type MyCustomClaims struct {
 var mySigningKey = []byte("secret")
 
 func init() {
-	// POST /register - create jwt
-	http.HandleFunc("/register", GetTokenHandler)
+	// POST /signup - create jwt
+	http.HandleFunc("/signup", GetTokenHandler)
+	http.HandleFunc("/settings", GetSettingsHandler)
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
@@ -105,6 +106,66 @@ func GetTokenHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		ReturnMessageJSON(w, "Error", "Authentication Failed", "Authentication Failed")
 	}
+}
+
+// func GetSettingsHandler(w http.ResponseWriter, r *http.Request) {
+// look in the db for email/password
+// and return user info
+// if not found return message about it
+// }
+
+// ProductsHandler handles the products page, returns all the products.
+func GetSettingsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	ok, username := CheckTokenGetUsername(r)
+	if !ok {
+		ReturnMessageJSON(w, "Error", "You are not authorized to do this, login & try again", "Invalid token")
+		return
+	}
+
+	if r.Method == "GET" {
+		var user User
+		// user, err = db.GetUser(username)
+
+		// if err != nil {
+		// 	ReturnMessageJSON(w, "Error", "Could't get user", "error")
+		// 	log.Println(err)
+		// 	return
+		// }
+
+		user = User{"josh@gmail.com", username}
+		js, err := json.Marshal(user)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(js)
+
+	}
+}
+
+// CheckTokenGetUsername gets the HTTP request as the argument and returns if the token is valid
+// which is passed as a header of the name Token and returns the username of the logged in user.
+func CheckTokenGetUsername(r *http.Request) (bool, string) {
+	token := r.Header["Token"][0]
+	ok, username := ValidateToken(token)
+	return ok, username
+}
+
+//ValidateToken will validate the token
+func ValidateToken(myToken string) (bool, string) {
+	token, err := jwt.ParseWithClaims(myToken, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(mySigningKey), nil
+	})
+
+	if err != nil {
+		log.Println("Invalid token.", token)
+		return false, ""
+	}
+
+	claims := token.Claims.(*MyCustomClaims)
+	return token.Valid, claims.Username
 }
 
 // ReturnMessageJSON is a wrapper which will send JSON document of type Message, it takes the following arguments
