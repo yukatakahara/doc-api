@@ -3,6 +3,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -29,10 +30,29 @@ type MyCustomClaims struct {
 
 var mySigningKey = []byte("secret")
 
+type Doctor struct {
+	Id              int    `json:"id"`
+	Name            string `json:"name"`
+	Email           string `json:"email"`
+	EmployeeId      string `json:"employee_id"`
+	TeamName        string `json:"team_name"`
+	TeamEmail       string `json:"team_email"`
+	TeamEmployees   string `json:"team_employees"`
+	IdeaDescription string `json:"idea_description"`
+}
+
+// our 'database' - for now it will be in memory but later on we'll save it in postgres
+// slice that each of it's elements is the Doctor struct
+var doctors = []Doctor{
+	{1, "dan", "dan@gmail.com", "123", "cats", "cats@gmail.com", "josh, dan, lea", "instagram but for cats"},
+	{2, "laura", "laura@gmail.com", "143", "dogs", "dogs@gmail.com", "laura, josh", "social network for dogs"},
+}
+
 func init() {
 	// POST /signup - create jwt
 	http.HandleFunc("/signup", GetTokenHandler)
 	http.HandleFunc("/settings", GetSettingsHandler)
+	http.HandleFunc("/doctors", DoctorsHandler)
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
@@ -42,6 +62,37 @@ func main() {
 type User struct {
 	Email string `json:"email"`
 	JWT   string `json:"jwt"`
+}
+
+func DoctorsHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		getDoctors(w, r)
+	default:
+		http.Error(w, r.Method+" not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func getDoctors(w http.ResponseWriter, r *http.Request) {
+	// first we build the response
+	res := struct {
+		Doctors []Doctor
+		Errors  []string
+	}{
+		doctors,
+		[]string{""},
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	// then we encode it as JSON on the response
+	enc := json.NewEncoder(w)
+	err := enc.Encode(res)
+
+	// And if encoding fails we log the error
+	if err != nil {
+		fmt.Errorf("encode response: %v", err)
+	}
 }
 
 //GetTokenHandler will get a token for the username and password
