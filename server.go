@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"time"
 
@@ -31,21 +32,34 @@ type MyCustomClaims struct {
 var mySigningKey = []byte("secret")
 
 type Doctor struct {
-	Id              int    `json:"id"`
-	Name            string `json:"name"`
-	Email           string `json:"email"`
-	EmployeeId      string `json:"employee_id"`
-	TeamName        string `json:"team_name"`
-	TeamEmail       string `json:"team_email"`
-	TeamEmployees   string `json:"team_employees"`
-	IdeaDescription string `json:"idea_description"`
+	Id         int    `json:"id"`
+	Name       string `json:"name"`
+	Email      string `json:"email"`
+	EmployeeId string `json:"employee_id"`
+	TeamName   string `json:"team_name"`
+	Address    string `json:"adress"`
+	Lat        string `json:"lat"`
+	Lon        string `json:"lon"`
 }
 
 // our 'database' - for now it will be in memory but later on we'll save it in postgres
 // slice that each of it's elements is the Doctor struct
 var doctors = []Doctor{
-	{1, "dan", "dan@gmail.com", "123", "cats", "cats@gmail.com", "josh, dan, lea", "instagram but for cats"},
-	{2, "laura", "laura@gmail.com", "143", "dogs", "dogs@gmail.com", "laura, josh", "social network for dogs"},
+	{1, "Novena Medical Center Singapore", "dan@gmail.com", "123", "cats", "10 Sinaran Dr, Singapore 307506", "1.328829", "103.844859"},
+	{2, "Central 24-HR Clinic (Clementi)", "laura@gmail.com", "143", "dogs", "Blk 450 Clementi Ave 3 , #01-291, Singapore 120450", "1.320201", "103.764449"},
+	{4, "Central 24-HR Clinic (Hougang)", "laura@gmail.com", "143", "dogs", "681 Hougang Avenue 8 #01-831, Singapore 530681", "1.380640", "103.884989"},
+	{5, "Central 24-HR Clinic (Bedok)", "laura@gmail.com", "143", "dogs", "Blk 219 Bedok Central #01-124, Singapore 460219", "1.332237", "103.932853"},
+	{6, "SingHealth Polyclinics", "laura@gmail.com", "143", "dogs", " 580 Stirling Road, Singapore 148958", "1.305447", "103.802419"},
+	{7, "International Medical Clinic", "laura@gmail.com", "143", "dogs", "1 Orchard Boulevard, #14-06 Camden Medical Centre, Singapore 248649", "1.310574", "103.824854"},
+	{8, "Central 24-HR Clinic (Jurong West)", "laura@gmail.com", "143", "dogs", "492 Jurong West Street 41, #01-54, Singapore 640492", "1.356569", "103.724055"},
+	{9, "Central 24-HR Clinic (Pasir Ris)", "laura@gmail.com", "143", "dogs", "446 Pasir Ris Drive 6 #01-122, Singapore 510446", "1.376433", "103.957140"},
+	{10, "Toh Guan Family Clinic", "laura@gmail.com", "143", "dogs", "267A Toh Guan Rd, Singapore 601267", "1.349597", "103.746308"},
+	{11, "Healthway Medical Clinic", "laura@gmail.com", "143", "dogs", "267 Compassvale Link #01-04, Singapore 544267", "1.391390", "103.898317"},
+	{12, "Thomson 24-Hour Family Clinic", "laura@gmail.com", "143", "dogs", "339 Thomson Rd, Singapore 307677", "1.332861", "103.841544"},
+	{13, "Shenton Family Medical Clinic", "laura@gmail.com", "143", "dogs", "201D Tampines Street 21, #01-1137, Singapore 524201", "1.358216", "103.952443"},
+	{14, "The Travel Clinic", "laura@gmail.com", "143", "dogs", "Level 4,17, Third Hospital Drive, Diabetes & Metabolism Centre, Singapore 168752", "1.287128", "103.836738"},
+	{15, "Dayspring Medical Clinic - Pasir Ris", "laura@gmail.com", "143", "dogs", "1 Pasir Ris Central Street 3, #05-09 White Sands, White Sands, Singapore 518457", "1.372844", "103.949525"},
+	{16, "Parkway Shenton Pte Ltd", "laura@gmail.com", "143", "dogs", "20 Bendemeer Rd, Singapore 33991", "1.314670", "103.862142"},
 }
 
 func init() {
@@ -74,6 +88,14 @@ func DoctorsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getDoctors(w http.ResponseWriter, r *http.Request) {
+	lat := r.URL.Query()["lat"]
+	lon := r.URL.Query()["lon"]
+
+	if lat != nil && lon != nil {
+		// order the list of doctors based on proximity
+		fmt.Println("URL", r.URL)
+	}
+
 	// first we build the response
 	res := struct {
 		Doctors []Doctor
@@ -241,4 +263,35 @@ func ReturnMessageJSON(w http.ResponseWriter, messageType, userMessage, devMessa
 		panic(err)
 	}
 	return
+}
+
+// haversin(θ) function
+func hsin(theta float64) float64 {
+	return math.Pow(math.Sin(theta/2), 2)
+}
+
+// Distance function returns the distance (in meters) between two points of
+//     a given longitude and latitude relatively accurately (using a spherical
+//     approximation of the Earth) through the Haversin Distance Formula for
+//     great arc distance on a sphere with accuracy for small distances
+//
+// point coordinates are supplied in degrees and converted into rad. in the func
+//
+// distance returned is METERS!!!!!!
+// http://en.wikipedia.org/wiki/Haversine_formula
+func Distance(lat1, lon1, lat2, lon2 float64) float64 {
+	// convert to radians
+	// must cast radius as float to multiply later
+	var la1, lo1, la2, lo2, r float64
+	la1 = lat1 * math.Pi / 180
+	lo1 = lon1 * math.Pi / 180
+	la2 = lat2 * math.Pi / 180
+	lo2 = lon2 * math.Pi / 180
+
+	r = 6378100 // Earth radius in METERS
+
+	// calculate
+	h := hsin(la2-la1) + math.Cos(la1)*math.Cos(la2)*hsin(lo2-lo1)
+
+	return 2 * r * math.Asin(math.Sqrt(h))
 }
