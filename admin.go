@@ -47,7 +47,6 @@ func initializeAndOpenGraph(dbFile string) *cayley.Handle {
 func (p *Admin) Create(email string, password string) Admin {
 	store := initializeAndOpenGraph(dbPath)
 
-	fmt.Println("email", email)
 	err := validateFormat(email)
 
 	if err != nil {
@@ -82,22 +81,35 @@ func hashPassword(password string) (string, error) {
 // get admins from the db
 func (a *Admin) All() []Admin {
 	store := initializeAndOpenGraph(dbPath)
-	var err error
 
-	p := cayley.StartPath(store).Has(quad.String("is_a"), quad.String("admin")).Out()
+	p := cayley.StartPath(store).Has(quad.String("is_a"), quad.String("admin")).Save("email", "email").Save("hashed_password", "pass")
 
 	results := []Admin{}
-	err = p.Iterate(nil).EachValue(nil, func(value quad.Value) {
-		nativeValue := quad.NativeOf(value) // this converts RDF values to normal Go types
-		fmt.Println(nativeValue)
+	err := p.Iterate(nil).TagValues(store, func(tags map[string]quad.Value) {
+		results = append(results, Admin{
+			quad.NativeOf(tags["email"]).(string),
+			quad.NativeOf(tags["pass"]).(string),
+		})
 	})
 
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	results = append(results, Admin{"foo@gmail.com", "mbmbjkjk"})
-	results = append(results, Admin{"bar@gmail.com", "54354353"})
+	// p := cayley.StartPath(store).Has(quad.String("is_a"), quad.String("admin")).Out()
+
+	// results := []Admin{}
+	// err = p.Iterate(nil).EachValue(nil, func(value quad.Value) {
+	// 	nativeValue := quad.NativeOf(value) // this converts RDF values to normal Go types
+	// 	fmt.Println(nativeValue)
+	// })
+
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
+
+	// results = append(results, Admin{"foo@gmail.com", "mbmbjkjk"})
+	// results = append(results, Admin{"bar@gmail.com", "54354353"})
 
 	return results
 }
