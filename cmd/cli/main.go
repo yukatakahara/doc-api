@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 
-	_ "github.com/cayleygraph/cayley/graph/bolt"
 	"github.com/oren/doc-api"
 )
 

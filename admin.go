@@ -56,7 +56,7 @@ func (p *Admin) Create(email string, password string) Admin {
 	}
 
 	uuid := uuid.NewV1().String()
-	hash, _ := HashPassword(password) // ignore error for the sake of simplicity
+	hash, _ := hashPassword(password) // ignore error for the sake of simplicity
 
 	store.AddQuad(quad.Make(uuid, "is_a", "admin", nil))
 	store.AddQuad(quad.Make(uuid, "email", email, nil))
@@ -74,7 +74,7 @@ func ValidateFormat(email string) error {
 	return nil
 }
 
-func HashPassword(password string) (string, error) {
+func hashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }
