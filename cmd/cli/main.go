@@ -33,11 +33,22 @@ func main() {
 	store := initializeAndOpenGraph(dbFile)
 
 	createAdmin(store, *email, *password) // add quads to the graph
-	fmt.Println(*email)
+	listAdmins(store)
+}
 
-	// countOuts(store, "41234214")
-	// lookAtOuts(store, "41234214")
-	// lookAtIns(store, "41234214")
+func listAdmins(store *cayley.Handle) {
+	var err error
+
+	p := cayley.StartPath(store).Has(quad.String("is_a"), quad.String("admin")).Out()
+
+	err = p.Iterate(nil).EachValue(nil, func(value quad.Value) {
+		nativeValue := quad.NativeOf(value) // this converts RDF values to normal Go types
+		fmt.Println(nativeValue)
+	})
+
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
 
 func HashPassword(password string) (string, error) {
@@ -77,8 +88,8 @@ func createAdmin(store *cayley.Handle, email string, password string) {
 	store.AddQuad(quad.Make(uuid, "email", email, nil))
 	store.AddQuad(quad.Make(uuid, "hashed_password", hash, nil))
 
-	countOuts(store, uuid)
-	lookAtOuts(store, uuid)
+	// countOuts(store, uuid)
+	// lookAtOuts(store, uuid)
 }
 
 func ValidateFormat(email string) error {

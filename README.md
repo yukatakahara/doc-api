@@ -2,6 +2,7 @@
 
 ## Setup
 
+    cd cmd/web
     go run server.go
 
 ## Endpoints
