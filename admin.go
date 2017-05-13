@@ -2,7 +2,6 @@ package admin
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -17,6 +16,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var dbPath = "/tmp/db.boltdb"
 var ErrBadFormat = errors.New("invalid email format")
 var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
@@ -31,11 +31,11 @@ func New() (*Admin, error) {
 	return a, nil
 }
 
-func initializeAndOpenGraph(dbFile *string) *cayley.Handle {
-	graph.InitQuadStore("bolt", *dbFile, nil)
+func initializeAndOpenGraph(dbFile string) *cayley.Handle {
+	graph.InitQuadStore("bolt", dbFile, nil)
 
 	// Open and use the database
-	store, err := cayley.NewGraph("bolt", *dbFile, nil)
+	store, err := cayley.NewGraph("bolt", dbFile, nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -43,12 +43,11 @@ func initializeAndOpenGraph(dbFile *string) *cayley.Handle {
 	return store
 }
 
+// create new admin in the db
 func (p *Admin) Create(email string, password string) Admin {
-	dbFile := flag.String("db", "db.boltdb", "BoltDB file")
-	store := initializeAndOpenGraph(dbFile)
+	store := initializeAndOpenGraph(dbPath)
 
 	fmt.Println("email", email)
-	// create new admin in the db
 	err := ValidateFormat(email)
 
 	if err != nil {
@@ -80,10 +79,9 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
+// get admins from the db
 func (a *Admin) All() []Admin {
-	// get admins from the db
-	dbFile := flag.String("db", "db.boltdb", "BoltDB file")
-	store := initializeAndOpenGraph(dbFile)
+	store := initializeAndOpenGraph(dbPath)
 	var err error
 
 	p := cayley.StartPath(store).Has(quad.String("is_a"), quad.String("admin")).Out()
