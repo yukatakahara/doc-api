@@ -96,20 +96,5 @@ func (a *Admin) All() []Admin {
 		log.Fatalln(err)
 	}
 
-	// p := cayley.StartPath(store).Has(quad.String("is_a"), quad.String("admin")).Out()
-
-	// results := []Admin{}
-	// err = p.Iterate(nil).EachValue(nil, func(value quad.Value) {
-	// 	nativeValue := quad.NativeOf(value) // this converts RDF values to normal Go types
-	// 	fmt.Println(nativeValue)
-	// })
-
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
-
-	// results = append(results, Admin{"foo@gmail.com", "mbmbjkjk"})
-	// results = append(results, Admin{"bar@gmail.com", "54354353"})
-
 	return results
 }
