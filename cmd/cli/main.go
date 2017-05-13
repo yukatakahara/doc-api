@@ -2,40 +2,48 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	"os"
-	"regexp"
 
 	_ "github.com/cayleygraph/cayley/graph/bolt"
 	"github.com/oren/doc-api"
 )
 
-var ErrBadFormat = errors.New("invalid email format")
-var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-
 func main() {
-	email := flag.String("email", "", "email")
-	// password := flag.String("password", "", "password")
-	flag.Parse()
-	fmt.Println("email", *email)
-	os.Exit(0)
+	addCommand := flag.NewFlagSet("add-admin", flag.ExitOnError)
+	email := addCommand.String("email", "", "Admin's email. (Required)")
+	password := addCommand.String("password", "", "Admin's password. (Required)")
 
-	arg := os.Args[1]
+	listCommand := flag.NewFlagSet("list-admins", flag.ExitOnError)
 
-	Admin, err := admin.New()
-	if err != nil {
-		panic(err)
+	// os.Arg[1] will be the subcommand
+	if len(os.Args) < 2 {
+		fmt.Println("add-admin or list-admins subcommand is required")
+		os.Exit(1)
 	}
 
-	switch arg {
-	case "create-admin":
-		email := flag.String("email", "", "email")
-		password := flag.String("password", "", "password")
-		flag.Parse()
+	switch os.Args[1] {
+	case "add-admin":
+		addCommand.Parse(os.Args[2:])
+	case "list-admins":
+		listCommand.Parse(os.Args[2:])
+	default:
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
 
-		fmt.Println("email", *email)
+	if addCommand.Parsed() {
+		// Required Flags
+		if *email == "" || *password == "" {
+			addCommand.PrintDefaults()
+			os.Exit(1)
+		}
+
+		Admin, err := admin.New()
+		if err != nil {
+			panic(err)
+		}
 
 		results := Admin.Create(*email, *password)
 		data, err := json.Marshal(results)
@@ -45,8 +53,15 @@ func main() {
 		}
 
 		os.Stdout.Write(data)
-		os.Exit(0)
-	case "list-admins":
+	}
+
+	if listCommand.Parsed() {
+		Admin, err := admin.New()
+
+		if err != nil {
+			panic(err)
+		}
+
 		results := Admin.All()
 		data, err := json.Marshal(results)
 
@@ -55,31 +70,5 @@ func main() {
 		}
 
 		os.Stdout.Write(data)
-		os.Exit(0)
-	default:
-		fmt.Println("Wrong argument")
-		os.Exit(0)
 	}
-
-	// results := Admin.Create("foobar@gmail.com", "password11")
-	// // results := Admin.All()
-	// data, err := json.Marshal(results)
-	// if err != nil {
-	// 	fmt.Errorf("encode response: %v", err)
-	// }
-	// os.Stdout.Write(data)
-
-	// Some globally applicable things
-	// graph.IgnoreMissing = true
-	// graph.IgnoreDuplicates = true
-
-	// dbFile := flag.String("db", "db.boltdb", "BoltDB file")
-	// email := flag.String("email", "", "email")
-	// password := flag.String("password", "", "password")
-	// flag.Parse()
-
-	// store := initializeAndOpenGraph(dbFile)
-
-	// createAdmin(store, *email, *password) // add quads to the graph
-	// listAdmins(store)
 }
