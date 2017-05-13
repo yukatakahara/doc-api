@@ -48,7 +48,7 @@ func (p *Admin) Create(email string, password string) Admin {
 	store := initializeAndOpenGraph(dbPath)
 
 	fmt.Println("email", email)
-	err := ValidateFormat(email)
+	err := validateFormat(email)
 
 	if err != nil {
 		fmt.Println(err)
@@ -67,7 +67,7 @@ func (p *Admin) Create(email string, password string) Admin {
 	return a
 }
 
-func ValidateFormat(email string) error {
+func validateFormat(email string) error {
 	if !emailRegexp.MatchString(email) {
 		return ErrBadFormat
 	}
