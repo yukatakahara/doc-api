@@ -1,5 +1,8 @@
 package admin
 
+// todo: use context to keep my db connection
+// or use a service structure
+
 import (
 	"errors"
 	"log"
@@ -13,6 +16,11 @@ import (
 var dbPath = "/tmp/db.boltdb"
 var ErrBadFormat = errors.New("invalid email format")
 var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+var store *cayley.Handle
+
+func init() {
+	store = initializeAndOpenGraph(dbPath)
+}
 
 type Admin struct {
 	ID             string `json:"id"`
@@ -40,6 +48,7 @@ func initializeAndOpenGraph(dbFile string) *cayley.Handle {
 
 	// Open and use the database
 	store, err := cayley.NewGraph("bolt", dbFile, nil)
+
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -11,7 +11,6 @@ import (
 // TODO: Use lock to make sure between check and write we don't have one slip in
 // func CreateAdmin(h *cayley.Handle, a Admin) error {
 func (a *Admin) Create() error {
-	h := initializeAndOpenGraph(dbPath)
 	err := validateEmail(a.Email)
 	if err != nil {
 		return err
@@ -28,7 +27,7 @@ func (a *Admin) Create() error {
 	t.AddQuad(quad.Make(quad.IRI(uuid), quad.IRI("is_a"), quad.String("admin"), nil))
 	t.AddQuad(quad.Make(quad.IRI(uuid), quad.IRI("email"), quad.String(a.Email), nil))
 	t.AddQuad(quad.Make(quad.IRI(uuid), quad.IRI("hashed_password"), quad.String(a.HashedPassword), nil))
-	err = h.ApplyTransaction(t)
+	err = store.ApplyTransaction(t)
 
 	if err != nil {
 		return err

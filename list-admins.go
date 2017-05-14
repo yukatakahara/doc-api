@@ -10,9 +10,7 @@ import (
 
 // get admins from the db
 func (a *Admin) All() []Admin {
-	h := initializeAndOpenGraph(dbPath)
-
-	As, err := ReadAdmins(h, regexp.MustCompile(".*"))
+	As, err := ReadAdmins(store, regexp.MustCompile(".*"))
 
 	if err != nil {
 		log.Fatal(err)

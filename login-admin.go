@@ -11,10 +11,8 @@ import (
 )
 
 func (a *Admin) Login() {
-	h := initializeAndOpenGraph(dbPath)
-
 	// find admin in the db based on email
-	found, err := findAdmin(h, regexp.MustCompile(a.Email))
+	found, err := findAdmin(store, regexp.MustCompile(a.Email))
 
 	if err != nil {
 		log.Fatal(err)
@@ -30,6 +28,8 @@ func checkPasswordHash(password, hash string) bool {
 }
 
 func findAdmin(h *cayley.Handle, email *regexp.Regexp) (Admin, error) {
+	// defer h.Close()
+
 	p := cayley.StartPath(h).
 		Out(quad.IRI("email")).Regex(email).In(quad.IRI("email")).Has(quad.IRI("is_a"), quad.String("admin")).
 		Save(quad.IRI("hashed_password"), "hashed_password")
