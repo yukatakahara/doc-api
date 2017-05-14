@@ -15,9 +15,13 @@ func main() {
 
 	listCommand := flag.NewFlagSet("list-admins", flag.ExitOnError)
 
+	loginAdminCommand := flag.NewFlagSet("login-admin", flag.ExitOnError)
+	email2 := loginAdminCommand.String("email", "", "Admin's email. (Required)")
+	password2 := loginAdminCommand.String("password", "", "Admin's password. (Required)")
+
 	// os.Arg[1] will be the subcommand
 	if len(os.Args) < 2 {
-		fmt.Println("add-admin or list-admins subcommand is required")
+		fmt.Println("add-admin or list-admins or login-admin subcommand is required")
 		os.Exit(1)
 	}
 
@@ -26,6 +30,8 @@ func main() {
 		addCommand.Parse(os.Args[2:])
 	case "list-admins":
 		listCommand.Parse(os.Args[2:])
+	case "login-admin":
+		loginAdminCommand.Parse(os.Args[2:])
 	default:
 		flag.PrintDefaults()
 		os.Exit(1)
@@ -73,6 +79,26 @@ func main() {
 		// os.Stdout.Write(data)
 
 		PrintAdmins(results)
+	}
+
+	if loginAdminCommand.Parsed() {
+		// Required Flags
+		if *email2 == "" || *password2 == "" {
+			addCommand.PrintDefaults()
+			os.Exit(1)
+		}
+
+		Admin, err := admin.New()
+		if err != nil {
+			panic(err)
+		}
+
+		Admin.Email = *email2
+		Admin.Password = *password2
+
+		Admin.Login()
+
+		fmt.Printf("Logged in? %+v\n", Admin.LoggedIn)
 	}
 }
 

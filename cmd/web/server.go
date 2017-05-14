@@ -153,8 +153,18 @@ func adminLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	Admin, err := admin.New()
+	if err != nil {
+		panic(err)
+	}
+
+	Admin.Email = a.Email
+	Admin.Password = a.Password
+
+	Admin.Login()
+
 	// if admin exist in the db
-	if true {
+	if Admin.LoggedIn {
 		// Create the Claim which expires after EXPIRATION_HOURS hrs, default is 5.
 		claims := MyCustomClaims{
 			a.Email,

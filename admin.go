@@ -19,6 +19,7 @@ type Admin struct {
 	Email          string `json:"email"`
 	Password       string `json:"password"`
 	HashedPassword string `json:"hashedPassword"`
+	LoggedIn       bool
 }
 
 func checkErr(err error) {
@@ -29,6 +30,7 @@ func checkErr(err error) {
 
 func New() (*Admin, error) {
 	a := &Admin{}
+	a.LoggedIn = false
 
 	return a, nil
 }
