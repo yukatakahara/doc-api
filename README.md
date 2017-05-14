@@ -7,11 +7,15 @@
 
 ## Endpoints
 
-### Signup
+### Admin Login
+
+    curl -v -H "Accept: application/json" -H "Content-type: application/json" POST -d '{"email":"foo@gmail.com","password":"password123"}' "http://localhost:3000/adminlogin"
+
+### Patient Signup
 
     curl -v -H "Accept: application/json" -H "Content-type: application/json" POST -d '{"email":"foo@gmail.com","password":"password123"}' "http://localhost:3000/signup"
 
-### Login
+### Patient Login
 
     curl -v -H "Accept: application/json" -H "Content-type: application/json" POST -d '{"email":"foo@gmail.com","password":"password123"}' "http://localhost:3000/login"
 

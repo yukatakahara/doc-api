@@ -10,6 +10,7 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/oren/doc-api"
 )
 
 // Message struct represents the JSON document which the API sends when something wrong will happen.
@@ -65,6 +66,7 @@ var doctors = []Doctor{
 
 func init() {
 	// POST /signup - create jwt
+	http.HandleFunc("/adminlogin", adminLogin)
 	http.HandleFunc("/signup", GetTokenHandler)
 	http.HandleFunc("/login", Login)
 	http.HandleFunc("/settings", GetSettingsHandler)
@@ -122,6 +124,75 @@ func getDoctors(w http.ResponseWriter, r *http.Request) {
 func sortDoctors(doctors []Doctor, lat string, lon string) []Doctor {
 
 	return doctors
+}
+
+func ServerError(w http.ResponseWriter, err error) {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+}
+
+func adminLogin(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "OPTIONS" {
+		ReturnMessageJSON(w, "Information", "", "")
+		return
+	}
+
+	if r.Method != "POST" {
+		ReturnMessageJSON(w, "Error", "Page not available", "GetTokenHandler only accepts a POST")
+		return
+	}
+
+	a := &admin.Admin{}
+
+	if err := json.NewDecoder(r.Body).Decode(a); err != nil {
+		ServerError(w, err)
+		return
+	}
+
+	if a.Email == "" || a.Password == "" {
+		ReturnMessageJSON(w, "Error", "Invalid Email/Password", "Invalid Email or password in GetTokenHandler")
+		return
+	}
+
+	// if admin exist in the db
+	if true {
+		// Create the Claim which expires after EXPIRATION_HOURS hrs, default is 5.
+		claims := MyCustomClaims{
+			a.Email,
+			jwt.StandardClaims{
+				ExpiresAt: time.Now().Add(time.Hour * 5).Unix(),
+			},
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+		/* Sign the token with our secret */
+		tokenString, err := token.SignedString(mySigningKey)
+		if err != nil {
+			log.Println("Something went wrong with signing token")
+			ReturnMessageJSON(w, "Error", "Authentication Failed", "Authentication Failed")
+
+			return
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token")
+		w.Header().Set("Content-Type", "application/json")
+
+		user := User{a.Email, tokenString}
+
+		js, err := json.Marshal(user)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(js)
+
+		// w.Write([]byte(tokenString))
+	} else {
+		ReturnMessageJSON(w, "Error", "Authentication Failed", "Authentication Failed")
+	}
 }
 
 //GetTokenHandler will get a token for the username and password
