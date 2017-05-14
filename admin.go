@@ -11,8 +11,9 @@ import (
 	"github.com/cayleygraph/cayley/graph"
 	_ "github.com/cayleygraph/cayley/graph/bolt"
 	"github.com/cayleygraph/cayley/quad"
-
+	"github.com/cayleygraph/cayley/schema"
 	uuid "github.com/satori/go.uuid"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -20,9 +21,22 @@ var dbPath = "/tmp/db.boltdb"
 var ErrBadFormat = errors.New("invalid email format")
 var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
+// type Admin struct {
+// 	Email          string `json:"email"`
+// 	HashedPassword string `json:"hashedPassword"`
+// }
+
+// <admin_id> <rdf:type> <Admin> triple on Admin type
 type Admin struct {
-	Email          string `json:"email"`
-	HashedPassword string `json:"hashedPassword"`
+	Email          string   `json:"email" quad:"email"`
+	HashedPassword string   `json:"hashedPassword"  quad:"hashed_password"`
+	ID             quad.IRI `quad:"@id"`
+}
+
+func checkErr(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func New() (*Admin, error) {
@@ -54,14 +68,23 @@ func (p *Admin) Create(email string, password string) Admin {
 		os.Exit(1)
 	}
 
-	uuid := uuid.NewV1().String()
+	// schema.GenerateID = func(_ interface{}) quad.Value {
+	// 	return quad.IRI(uuid.NewV1().String())
+	// }
+
+	qw := graph.NewWriter(store)
+
 	hash, _ := hashPassword(password) // ignore error for the sake of simplicity
+	id := quad.IRI(uuid.NewV1().String())
 
-	store.AddQuad(quad.Make(uuid, "is_a", "admin", nil))
-	store.AddQuad(quad.Make(uuid, "email", email, nil))
-	store.AddQuad(quad.Make(uuid, "hashed_password", hash, nil))
+	a := Admin{
+		email,
+		hash,
+		id,
+	}
 
-	a := Admin{email, hash}
+	_, err = schema.WriteAsQuads(qw, a)
+	checkErr(err)
 
 	return a
 }
@@ -81,20 +104,12 @@ func hashPassword(password string) (string, error) {
 // get admins from the db
 func (a *Admin) All() []Admin {
 	store := initializeAndOpenGraph(dbPath)
+	// will require a <admin_id> <rdf:type> <Admin> triple on Admin type
+	schema.RegisterType("Admin", Admin{})
 
-	p := cayley.StartPath(store).Has(quad.String("is_a"), quad.String("admin")).Save("email", "email").Save("hashed_password", "pass")
-
-	results := []Admin{}
-	err := p.Iterate(nil).TagValues(store, func(tags map[string]quad.Value) {
-		results = append(results, Admin{
-			quad.NativeOf(tags["email"]).(string),
-			quad.NativeOf(tags["pass"]).(string),
-		})
-	})
-
-	if err != nil {
-		log.Fatalln(err)
-	}
+	var results []Admin
+	err := schema.LoadTo(nil, store, &results)
+	checkErr(err)
 
 	return results
 }
