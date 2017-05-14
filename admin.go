@@ -2,16 +2,13 @@ package admin
 
 import (
 	"errors"
-	"fmt"
 	"log"
-	"os"
 	"regexp"
 
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/graph"
 	_ "github.com/cayleygraph/cayley/graph/bolt"
 	"github.com/cayleygraph/cayley/quad"
-	"github.com/cayleygraph/cayley/schema"
 	uuid "github.com/satori/go.uuid"
 
 	"golang.org/x/crypto/bcrypt"
@@ -21,16 +18,11 @@ var dbPath = "/tmp/db.boltdb"
 var ErrBadFormat = errors.New("invalid email format")
 var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
-// type Admin struct {
-// 	Email          string `json:"email"`
-// 	HashedPassword string `json:"hashedPassword"`
-// }
-
-// <admin_id> <rdf:type> <Admin> triple on Admin type
 type Admin struct {
-	Email          string   `json:"email" quad:"email"`
-	HashedPassword string   `json:"hashedPassword"  quad:"hashed_password"`
-	ID             quad.IRI `quad:"@id"`
+	ID             string `json:"id"`
+	Email          string `json:"email"`
+	Password       string `json:"-"` // - so it doesn't get encoded to json ever
+	HashedPassword string `json:"hashedPassword"`
 }
 
 func checkErr(err error) {
@@ -57,39 +49,37 @@ func initializeAndOpenGraph(dbFile string) *cayley.Handle {
 	return store
 }
 
-// create new admin in the db
-func (p *Admin) Create(email string, password string) Admin {
-	store := initializeAndOpenGraph(dbPath)
+// TODO: Check for duplicate email
+// TODO: Use lock to make sure between check and write we don't have one slip in
+// func CreateAdmin(h *cayley.Handle, a Admin) error {
+func (a *Admin) Create() error {
+	h := initializeAndOpenGraph(dbPath)
+	err := validateEmail(a.Email)
+	if err != nil {
+		return err
+	}
 
-	err := validateFormat(email)
+	a.HashedPassword, err = hashPassword(a.Password)
+	if err != nil {
+		return err
+	}
+
+	uuid := uuid.NewV1().String()
+
+	t := cayley.NewTransaction()
+	t.AddQuad(quad.Make(quad.IRI(uuid), quad.IRI("is_a"), quad.String("admin"), nil))
+	t.AddQuad(quad.Make(quad.IRI(uuid), quad.IRI("email"), quad.String(a.Email), nil))
+	t.AddQuad(quad.Make(quad.IRI(uuid), quad.IRI("hashed_password"), quad.String(a.HashedPassword), nil))
+	err = h.ApplyTransaction(t)
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return err
 	}
 
-	// schema.GenerateID = func(_ interface{}) quad.Value {
-	// 	return quad.IRI(uuid.NewV1().String())
-	// }
-
-	qw := graph.NewWriter(store)
-
-	hash, _ := hashPassword(password) // ignore error for the sake of simplicity
-	id := quad.IRI(uuid.NewV1().String())
-
-	a := Admin{
-		email,
-		hash,
-		id,
-	}
-
-	_, err = schema.WriteAsQuads(qw, a)
-	checkErr(err)
-
-	return a
+	return nil
 }
 
-func validateFormat(email string) error {
+func validateEmail(email string) error {
 	if !emailRegexp.MatchString(email) {
 		return ErrBadFormat
 	}
@@ -103,13 +93,34 @@ func hashPassword(password string) (string, error) {
 
 // get admins from the db
 func (a *Admin) All() []Admin {
-	store := initializeAndOpenGraph(dbPath)
-	// will require a <admin_id> <rdf:type> <Admin> triple on Admin type
-	schema.RegisterType("Admin", Admin{})
+	h := initializeAndOpenGraph(dbPath)
 
-	var results []Admin
-	err := schema.LoadTo(nil, store, &results)
-	checkErr(err)
+	As, err := ReadAdmins(h, regexp.MustCompile(".*"))
 
-	return results
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return As
+
+}
+
+func ReadAdmins(h *cayley.Handle, email *regexp.Regexp) ([]Admin, error) {
+	p := cayley.StartPath(h).Tag("id").
+		Out(quad.IRI("email")).Regex(email).In(quad.IRI("email")).Has(quad.IRI("is_a"), quad.String("admin")).
+		Save(quad.IRI("email"), "email").
+		Save(quad.IRI("hashed_password"), "hashed_password")
+
+	results := []Admin{}
+	err := p.Iterate(nil).TagValues(nil, func(tags map[string]quad.Value) {
+		results = append(results, Admin{
+			ID:             quad.NativeOf(tags["id"]).(quad.IRI).String(),
+			Email:          quad.NativeOf(tags["email"]).(string),
+			HashedPassword: quad.NativeOf(tags["hashed_password"]).(string),
+		})
+	})
+	if err != nil {
+		return []Admin{}, err
+	}
+	return results, nil
 }

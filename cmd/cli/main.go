@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -44,14 +43,17 @@ func main() {
 			panic(err)
 		}
 
-		results := Admin.Create(*email, *password)
-		data, err := json.Marshal(results)
+		Admin.Email = *email
+		Admin.Password = *password
 
-		if err != nil {
-			fmt.Errorf("encode response: %v", err)
-		}
+		_ = Admin.Create()
+		// data, err := json.Marshal(results)
 
-		os.Stdout.Write(data)
+		// if err != nil {
+		// 	fmt.Errorf("encode response: %v", err)
+		// }
+
+		// os.Stdout.Write(data)
 	}
 
 	if listCommand.Parsed() {
@@ -62,12 +64,24 @@ func main() {
 		}
 
 		results := Admin.All()
-		data, err := json.Marshal(results)
 
-		if err != nil {
-			fmt.Errorf("encode response: %v", err)
-		}
+		// data, err := json.Marshal(results)
 
-		os.Stdout.Write(data)
+		// if err != nil {
+		// 	fmt.Errorf("encode response: %v", err)
+		// }
+		// os.Stdout.Write(data)
+
+		PrintAdmins(results)
+	}
+}
+
+func PrintAdmins(as []admin.Admin) {
+	fmt.Println("\n==== All admins ====")
+
+	for _, a := range as {
+		fmt.Println("ID: ", a.ID)
+		fmt.Println("\tEmail: ", a.Email)
+		fmt.Println("\tHashedPassword: ", a.HashedPassword)
 	}
 }
