@@ -141,7 +141,7 @@ func adminLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a := &admin.Admin{}
+	a := &admin.EmailAndPassword{}
 
 	if err := json.NewDecoder(r.Body).Decode(a); err != nil {
 		ServerError(w, err)
@@ -155,54 +155,53 @@ func adminLogin(w http.ResponseWriter, r *http.Request) {
 
 	Admin, err := admin.New()
 	if err != nil {
-		panic(err)
+		fmt.Println("Error in admin login:", err)
+		ReturnMessageJSON(w, "Error", "Authentication Failed", fmt.Sprintf("Error in admin login: %s", err))
+		return
 	}
 
 	Admin.Email = a.Email
-	Admin.Password = a.Password
+	err = Admin.Login(a.Password)
 
-	Admin.Login()
-
-	// if admin exist in the db
-	if Admin.LoggedIn {
-		// Create the Claim which expires after EXPIRATION_HOURS hrs, default is 5.
-		claims := MyCustomClaims{
-			a.Email,
-			jwt.StandardClaims{
-				ExpiresAt: time.Now().Add(time.Hour * 5).Unix(),
-			},
-		}
-
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-		/* Sign the token with our secret */
-		tokenString, err := token.SignedString(mySigningKey)
-		if err != nil {
-			log.Println("Something went wrong with signing token")
-			ReturnMessageJSON(w, "Error", "Authentication Failed", "Authentication Failed")
-
-			return
-		}
-
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token")
-		w.Header().Set("Content-Type", "application/json")
-
-		user := User{a.Email, tokenString}
-
-		js, err := json.Marshal(user)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Write(js)
-
-		// w.Write([]byte(tokenString))
-	} else {
-		ReturnMessageJSON(w, "Error", "Authentication Failed", "Authentication Failed")
+	if err != nil {
+		fmt.Println("Error in admin login:", err)
+		ReturnMessageJSON(w, "Error", "Authentication Failed", fmt.Sprintf("Error in admin login: %s", err))
+		return
 	}
+
+	// Create the Claim which expires after EXPIRATION_HOURS hrs, default is 5.
+	claims := MyCustomClaims{
+		a.Email,
+		jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 5).Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	/* Sign the token with our secret */
+	tokenString, err := token.SignedString(mySigningKey)
+	if err != nil {
+		log.Println("Something went wrong with signing token")
+		ReturnMessageJSON(w, "Error", "Authentication Failed", "Authentication Failed")
+
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token")
+	w.Header().Set("Content-Type", "application/json")
+
+	user := User{a.Email, tokenString}
+
+	js, err := json.Marshal(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(js)
 }
 
 //GetTokenHandler will get a token for the username and password
@@ -404,6 +403,7 @@ func ReturnMessageJSON(w http.ResponseWriter, messageType, userMessage, devMessa
 	w.Header().Set("Content-Type", "application/json")
 
 	message := Message{Type: messageType, UserMessage: userMessage, DeveloperMessage: devMessage}
+
 	if messageType == "Information" {
 		w.WriteHeader(http.StatusOK)
 	} else {
@@ -414,6 +414,7 @@ func ReturnMessageJSON(w http.ResponseWriter, messageType, userMessage, devMessa
 	if err != nil {
 		panic(err)
 	}
+
 	return
 }
 

@@ -5,12 +5,16 @@ package admin
 
 import (
 	"errors"
+	"fmt"
 	"log"
+	"math/rand"
 	"regexp"
 
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/graph"
 	_ "github.com/cayleygraph/cayley/graph/bolt"
+	"github.com/cayleygraph/cayley/quad"
+	"github.com/cayleygraph/cayley/schema"
 )
 
 var dbPath = "/tmp/db.boltdb"
@@ -23,14 +27,36 @@ func init() {
 }
 
 type Admin struct {
-	ID             string `json:"id"`
-	Email          string `json:"email"`
-	Password       string `json:"password"`
-	HashedPassword string `json:"hashedPassword"`
+	ID             quad.IRI `quad:"@id"`
+	Name           string   `json:"name" quad:"name"`
+	Email          string   `json:"email" quad:"email"`
+	HashedPassword string   `json:"hashedPassword"  quad:"hashed_password"`
 	LoggedIn       bool
 }
 
-func checkErr(err error) {
+type EmailAndPassword struct {
+	Email    string `json:"email" quad:"email"`
+	Password string `json:"password" quad:"password"`
+}
+
+func init() {
+	schema.RegisterType("Admin", Admin{})
+}
+
+func genID() quad.IRI {
+	return quad.IRI(fmt.Sprintf("%x", rand.Intn(0xffff)))
+}
+
+// type Admin struct {
+// 	ID             string `json:"id"`
+// 	Email          string `json:"email"`
+// 	Password       string `json:"password"`
+// 	HashedPassword string `json:"hashedPassword"`
+// 	Name           string `json:"name"`
+// 	LoggedIn       bool
+// }
+
+func CheckErr(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}

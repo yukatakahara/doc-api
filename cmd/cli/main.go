@@ -12,6 +12,7 @@ func main() {
 	addCommand := flag.NewFlagSet("add-admin", flag.ExitOnError)
 	email := addCommand.String("email", "", "Admin's email. (Required)")
 	password := addCommand.String("password", "", "Admin's password. (Required)")
+	name := addCommand.String("name", "", "Admin's name. (Required)")
 
 	listCommand := flag.NewFlagSet("list-admins", flag.ExitOnError)
 
@@ -39,7 +40,7 @@ func main() {
 
 	if addCommand.Parsed() {
 		// Required Flags
-		if *email == "" || *password == "" {
+		if *email == "" || *password == "" || *name == "" {
 			addCommand.PrintDefaults()
 			os.Exit(1)
 		}
@@ -50,9 +51,10 @@ func main() {
 		}
 
 		Admin.Email = *email
-		Admin.Password = *password
+		Admin.Name = *name
 
-		_ = Admin.Create()
+		err = Admin.Create(*password)
+		admin.CheckErr(err)
 		// data, err := json.Marshal(results)
 
 		// if err != nil {
@@ -69,7 +71,8 @@ func main() {
 			panic(err)
 		}
 
-		results := Admin.All()
+		results, err := Admin.All()
+		admin.CheckErr(err)
 
 		// data, err := json.Marshal(results)
 
@@ -89,14 +92,12 @@ func main() {
 		}
 
 		Admin, err := admin.New()
-		if err != nil {
-			panic(err)
-		}
+		admin.CheckErr(err)
 
 		Admin.Email = *email2
-		Admin.Password = *password2
 
-		Admin.Login()
+		err = Admin.Login(*password2)
+		admin.CheckErr(err)
 
 		fmt.Printf("Logged in? %+v\n", Admin.LoggedIn)
 	}
