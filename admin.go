@@ -35,8 +35,8 @@ type Admin struct {
 }
 
 type EmailAndPassword struct {
-	Email    string `json:"email" quad:"email"`
-	Password string `json:"password" quad:"password"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func init() {

@@ -131,10 +131,16 @@ func ServerError(w http.ResponseWriter, err error) {
 }
 
 func adminLogin(w http.ResponseWriter, r *http.Request) {
+
 	if r.Method == "OPTIONS" {
 		ReturnMessageJSON(w, "Information", "", "")
 		return
 	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token")
+	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != "POST" {
 		ReturnMessageJSON(w, "Error", "Page not available", "GetTokenHandler only accepts a POST")
@@ -144,6 +150,7 @@ func adminLogin(w http.ResponseWriter, r *http.Request) {
 	a := &admin.EmailAndPassword{}
 
 	if err := json.NewDecoder(r.Body).Decode(a); err != nil {
+		fmt.Println("here", err)
 		ServerError(w, err)
 		return
 	}
@@ -187,11 +194,6 @@ func adminLogin(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token")
-	w.Header().Set("Content-Type", "application/json")
 
 	user := User{a.Email, tokenString}
 
