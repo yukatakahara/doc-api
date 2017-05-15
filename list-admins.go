@@ -11,7 +11,7 @@ import (
 func (a *Admin) All() ([]Admin, error) {
 	// As, err := ReadAdmins(store, regexp.MustCompile(".*"))
 	As, err := readAllAdmins(store)
-	// printAllQuads(store)
+	printAllQuads(store)
 	// printAllAdmins(store)
 
 	if err != nil {

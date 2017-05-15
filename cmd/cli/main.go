@@ -99,7 +99,7 @@ func main() {
 		err = Admin.Login(*password2)
 		admin.CheckErr(err)
 
-		fmt.Printf("Logged in? %+v\n", Admin.LoggedIn)
+		fmt.Println("Admin exist")
 	}
 }
 
