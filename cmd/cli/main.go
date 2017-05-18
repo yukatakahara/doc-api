@@ -15,14 +15,19 @@ func main() {
 	name := addCommand.String("name", "", "Admin's name. (Required)")
 
 	listCommand := flag.NewFlagSet("list-admins", flag.ExitOnError)
+	listClinics := flag.NewFlagSet("list-clinics", flag.ExitOnError)
 
 	loginAdminCommand := flag.NewFlagSet("login-admin", flag.ExitOnError)
 	email2 := loginAdminCommand.String("email", "", "Admin's email. (Required)")
 	password2 := loginAdminCommand.String("password", "", "Admin's password. (Required)")
 
+	addClinic := flag.NewFlagSet("add-clinic", flag.ExitOnError)
+	clinicName := addClinic.String("name", "", "Clinic's name. (Required)")
+	clinicAddress1 := addClinic.String("address1", "", "Clinic's address. (Required)")
+
 	// os.Arg[1] will be the subcommand
 	if len(os.Args) < 2 {
-		fmt.Println("add-admin or list-admins or login-admin subcommand is required")
+		fmt.Println("A subcommand is required")
 		os.Exit(1)
 	}
 
@@ -33,8 +38,13 @@ func main() {
 		listCommand.Parse(os.Args[2:])
 	case "login-admin":
 		loginAdminCommand.Parse(os.Args[2:])
+	case "add-clinic":
+		addClinic.Parse(os.Args[2:])
+	case "list-clinics":
+		listClinics.Parse(os.Args[2:])
 	default:
 		flag.PrintDefaults()
+		fmt.Println("Command not found")
 		os.Exit(1)
 	}
 
@@ -84,6 +94,26 @@ func main() {
 		PrintAdmins(results)
 	}
 
+	if listClinics.Parsed() {
+		Admin, err := admin.New()
+
+		if err != nil {
+			panic(err)
+		}
+
+		results, err := Admin.AllClinics()
+		admin.CheckErr(err)
+
+		// data, err := json.Marshal(results)
+
+		// if err != nil {
+		// 	fmt.Errorf("encode response: %v", err)
+		// }
+		// os.Stdout.Write(data)
+
+		PrintClinics(results)
+	}
+
 	if loginAdminCommand.Parsed() {
 		// Required Flags
 		if *email2 == "" || *password2 == "" {
@@ -101,6 +131,33 @@ func main() {
 
 		fmt.Println("Admin exist")
 	}
+
+	if addClinic.Parsed() {
+		// Required Flags
+		if *clinicName == "" || *clinicAddress1 == "" {
+			addClinic.PrintDefaults()
+			os.Exit(1)
+		}
+
+		Admin, err := admin.New()
+		if err != nil {
+			panic(err)
+		}
+
+		clinic := &admin.Clinic{
+			Name:     *clinicName,
+			Address1: *clinicAddress1,
+		}
+		err = Admin.AddClinic(clinic)
+		admin.CheckErr(err)
+		// data, err := json.Marshal(results)
+
+		// if err != nil {
+		// 	fmt.Errorf("encode response: %v", err)
+		// }
+
+		// os.Stdout.Write(data)
+	}
 }
 
 func PrintAdmins(as []admin.Admin) {
@@ -110,5 +167,15 @@ func PrintAdmins(as []admin.Admin) {
 		fmt.Println("ID: ", a.ID)
 		fmt.Println("\tEmail: ", a.Email)
 		fmt.Println("\tHashedPassword: ", a.HashedPassword)
+	}
+}
+
+func PrintClinics(as []admin.Clinic) {
+	fmt.Println("\n==== All clinics ====")
+
+	for _, a := range as {
+		fmt.Println("ID: ", a.ID)
+		fmt.Println("\tName: ", a.Name)
+		fmt.Println("\tAddress1: ", a.Address1)
 	}
 }

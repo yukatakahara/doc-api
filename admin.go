@@ -34,6 +34,13 @@ type Admin struct {
 	LoggedIn       bool
 }
 
+type Clinic struct {
+	ID        quad.IRI `quad:"@id"`
+	Name      string   `json:"name" quad:"name"`
+	Address1  string   `json:"address" quad:"address"`
+	CreatedBy quad.IRI `quad:"createdBy"`
+}
+
 type EmailAndPassword struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
