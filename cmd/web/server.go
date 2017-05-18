@@ -168,6 +168,7 @@ func adminLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Admin.Email = a.Email
+	//TODO: .Login() should take care of jwt and return struct with jwt
 	err = Admin.Login(a.Password)
 
 	if err != nil {
