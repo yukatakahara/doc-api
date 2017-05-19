@@ -162,43 +162,18 @@ func adminLogin(w http.ResponseWriter, r *http.Request) {
 
 	Admin, err := admin.New()
 	if err != nil {
-		fmt.Println("Error in admin login:", err)
 		ReturnMessageJSON(w, "Error", "Authentication Failed", fmt.Sprintf("Error in admin login: %s", err))
 		return
 	}
 
 	Admin.Email = a.Email
-	//TODO: .Login() should take care of jwt and return struct with jwt
-	err = Admin.Login(a.Password)
 
-	if err != nil {
-		fmt.Println("Error in admin login:", err)
-		ReturnMessageJSON(w, "Error", "Authentication Failed", fmt.Sprintf("Error in admin login: %s", err))
-		return
-	}
+	var jwt string
 
-	// Create the Claim which expires after EXPIRATION_HOURS hrs, default is 5.
-	claims := MyCustomClaims{
-		a.Email,
-		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 5).Unix(),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	/* Sign the token with our secret */
-	tokenString, err := token.SignedString(mySigningKey)
-	if err != nil {
-		log.Println("Something went wrong with signing token")
-		ReturnMessageJSON(w, "Error", "Authentication Failed", "Authentication Failed")
-
-		return
-	}
-
-	user := User{a.Email, tokenString}
-
+	jwt, err = Admin.Login(a.Password)
+	user := User{a.Email, jwt}
 	js, err := json.Marshal(user)
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
