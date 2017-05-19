@@ -28,6 +28,7 @@ func (a *Admin) AddClinic(c *Clinic, jwt string) error {
 	// var foundAdmin Admin
 	// foundAdmin, err = FindAdmin(store, claim.Email)
 	var id string
+	// id, err = getAdminID(store, claim.Email)
 	id, err = findID(store, claim.Email)
 
 	if err != nil {
@@ -51,16 +52,28 @@ func (a *Admin) AddClinic(c *Clinic, jwt string) error {
 }
 
 func findID(store *cayley.Handle, email string) (string, error) {
-	p := cayley.StartPath(store).Has(quad.IRI("is_a"), quad.String(email)).Tag("id")
+	p := cayley.StartPath(store).Has(quad.IRI("email"), quad.String(email))
 
-	err := p.Iterate(nil).TagValues(nil, func(tags map[string]quad.Value) {
-		return quad.NativeOf(tags["id"]).(quad.IRI).String(), nil
-	})
-
+	id, err := p.Iterate(nil).FirstValue(nil)
 	if err != nil {
 		return "", err
 	}
+	return id.(quad.IRI).String(), nil
 }
+
+// func getAdminID(store *cayley.Handle, email string) (string, error) {
+// 	p := cayley.StartPath(store).Has(quad.IRI("email"), quad.String(email)).Tag("id")
+
+// 	err := p.Iterate(nil).TagValues(nil, func(tags map[string]quad.Value) {
+// 		fmt.Println("quad.NativeOf()", quad.NativeOf(tags["id"]).(quad.IRI).String())
+// 	})
+
+// 	if err != nil {
+// 		return "", err
+// 	}
+
+// 	return "test", nil
+// }
 
 // TODO - validate clinic fields
 func validateFields() error {
