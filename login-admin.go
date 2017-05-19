@@ -15,7 +15,7 @@ import (
 
 func (a *Admin) Login(password string) (string, error) {
 	// find admin in the db based on email
-	adminFound, err := findAdmin(store, a.Email)
+	adminFound, err := FindAdmin(store, a.Email)
 
 	if err != nil {
 		return "", err
@@ -39,7 +39,7 @@ func checkPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func findAdmin(store *cayley.Handle, email string) (Admin, error) {
+func FindAdmin(store *cayley.Handle, email string) (Admin, error) {
 	var a Admin
 	p := path.StartPath(store).Has(quad.IRI("email"), quad.String(email))
 	err := schema.LoadPathTo(nil, store, &a, p)

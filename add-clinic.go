@@ -6,6 +6,7 @@ import (
 
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/graph"
+	"github.com/cayleygraph/cayley/quad"
 	"github.com/cayleygraph/cayley/schema"
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -23,15 +24,23 @@ func (a *Admin) AddClinic(c *Clinic, jwt string) error {
 		return err
 	}
 
-	// get email of admin from JWT
-	fmt.Println("email in claim", claim.Email)
 	// get admin.ID from bolt
-	// add ID to clinic struct
+	// var foundAdmin Admin
+	// foundAdmin, err = FindAdmin(store, claim.Email)
+	var id string
+	id, err = findID(store, claim.Email)
 
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("id", id)
+
+	// add ID to clinic
 	err = insert(store, Clinic{
 		Name:      c.Name,
 		Address1:  c.Address1,
-		CreatedBy: "a1",
+		CreatedBy: "10",
 	})
 
 	if err != nil {
@@ -39,6 +48,18 @@ func (a *Admin) AddClinic(c *Clinic, jwt string) error {
 	}
 
 	return nil
+}
+
+func findID(store *cayley.Handle, email string) (string, error) {
+	p := cayley.StartPath(store).Has(quad.IRI("is_a"), quad.String(email)).Tag("id")
+
+	err := p.Iterate(nil).TagValues(nil, func(tags map[string]quad.Value) {
+		return quad.NativeOf(tags["id"]).(quad.IRI).String(), nil
+	})
+
+	if err != nil {
+		return "", err
+	}
 }
 
 // TODO - validate clinic fields
