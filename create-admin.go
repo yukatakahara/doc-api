@@ -28,7 +28,6 @@ func (a *Admin) Create(password string) error {
 	// t.AddQuad(quad.Make(quad.IRI(uuid), quad.IRI("hashed_password"), quad.String(a.HashedPassword), nil))
 	// err = store.ApplyTransaction(t)
 	err = Insert(store, Admin{
-		ID:             genID(),
 		Name:           a.Name,
 		Email:          a.Email,
 		HashedPassword: a.HashedPassword,

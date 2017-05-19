@@ -22,6 +22,7 @@ func main() {
 	password2 := loginAdminCommand.String("password", "", "Admin's password. (Required)")
 
 	addClinic := flag.NewFlagSet("add-clinic", flag.ExitOnError)
+	adminJWT := addClinic.String("jwt", "", "Admin's JWT. (Required)")
 	clinicName := addClinic.String("name", "", "Clinic's name. (Required)")
 	clinicAddress1 := addClinic.String("address1", "", "Clinic's address. (Required)")
 
@@ -65,13 +66,6 @@ func main() {
 
 		err = Admin.Create(*password)
 		admin.CheckErr(err)
-		// data, err := json.Marshal(results)
-
-		// if err != nil {
-		// 	fmt.Errorf("encode response: %v", err)
-		// }
-
-		// os.Stdout.Write(data)
 	}
 
 	if listCommand.Parsed() {
@@ -83,14 +77,6 @@ func main() {
 
 		results, err := Admin.All()
 		admin.CheckErr(err)
-
-		// data, err := json.Marshal(results)
-
-		// if err != nil {
-		// 	fmt.Errorf("encode response: %v", err)
-		// }
-		// os.Stdout.Write(data)
-
 		PrintAdmins(results)
 	}
 
@@ -103,14 +89,6 @@ func main() {
 
 		results, err := Admin.AllClinics()
 		admin.CheckErr(err)
-
-		// data, err := json.Marshal(results)
-
-		// if err != nil {
-		// 	fmt.Errorf("encode response: %v", err)
-		// }
-		// os.Stdout.Write(data)
-
 		PrintClinics(results)
 	}
 
@@ -135,7 +113,7 @@ func main() {
 
 	if addClinic.Parsed() {
 		// Required Flags
-		if *clinicName == "" || *clinicAddress1 == "" {
+		if *adminJWT == "" || *clinicName == "" || *clinicAddress1 == "" {
 			addClinic.PrintDefaults()
 			os.Exit(1)
 		}
@@ -149,15 +127,8 @@ func main() {
 			Name:     *clinicName,
 			Address1: *clinicAddress1,
 		}
-		err = Admin.AddClinic(clinic)
+		err = Admin.AddClinic(clinic, *adminJWT)
 		admin.CheckErr(err)
-		// data, err := json.Marshal(results)
-
-		// if err != nil {
-		// 	fmt.Errorf("encode response: %v", err)
-		// }
-
-		// os.Stdout.Write(data)
 	}
 }
 
@@ -165,7 +136,6 @@ func PrintAdmins(as []admin.Admin) {
 	fmt.Println("\n==== All admins ====")
 
 	for _, a := range as {
-		fmt.Println("ID: ", a.ID)
 		fmt.Println("\tEmail: ", a.Email)
 		fmt.Println("\tHashedPassword: ", a.HashedPassword)
 	}
@@ -175,7 +145,6 @@ func PrintClinics(as []admin.Clinic) {
 	fmt.Println("\n==== All clinics ====")
 
 	for _, a := range as {
-		fmt.Println("ID: ", a.ID)
 		fmt.Println("\tName: ", a.Name)
 		fmt.Println("\tAddress1: ", a.Address1)
 	}

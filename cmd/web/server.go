@@ -367,7 +367,7 @@ func ValidateToken(myToken string) (bool, string) {
 	}
 
 	claims := token.Claims.(*MyCustomClaims)
-	return token.Valid, claims.Username
+	return token.Valid, claims.Email
 }
 
 // ReturnMessageJSON is a wrapper which will send JSON document of type Message, it takes the following arguments

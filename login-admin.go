@@ -26,7 +26,7 @@ func (a *Admin) Login(password string) (string, error) {
 		return "", fmt.Errorf("Password incorrect")
 	}
 
-	jwt, err := generateJWT()
+	jwt, err := generateJWT(adminFound.Email)
 	if err != nil {
 		return "", err
 	}
@@ -51,10 +51,10 @@ func findAdmin(store *cayley.Handle, email string) (Admin, error) {
 	return a, nil
 }
 
-func generateJWT() (string, error) {
+func generateJWT(email string) (string, error) {
 	// Create the Claim which expires after EXPIRATION_HOURS hrs, default is 5.
 	claims := MyCustomClaims{
-		"some info",
+		email,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 5).Unix(),
 		},

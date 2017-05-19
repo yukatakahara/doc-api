@@ -5,9 +5,7 @@ package admin
 
 import (
 	"errors"
-	"fmt"
 	"log"
-	"math/rand"
 	"regexp"
 
 	"github.com/cayleygraph/cayley"
@@ -30,15 +28,13 @@ func init() {
 }
 
 type Admin struct {
-	ID             quad.IRI `quad:"@id"`
-	Name           string   `json:"name" quad:"name"`
-	Email          string   `json:"email" quad:"email"`
-	HashedPassword string   `json:"hashedPassword"  quad:"hashed_password"`
+	Name           string `json:"name" quad:"name"`
+	Email          string `json:"email" quad:"email"`
+	HashedPassword string `json:"hashedPassword"  quad:"hashed_password"`
 	LoggedIn       bool
 }
 
 type Clinic struct {
-	ID        quad.IRI `quad:"@id"`
 	Name      string   `json:"name" quad:"name"`
 	Address1  string   `json:"address" quad:"address"`
 	CreatedBy quad.IRI `quad:"createdBy"`
@@ -50,12 +46,8 @@ type EmailAndPassword struct {
 }
 
 type MyCustomClaims struct {
-	Username string `json:"username"`
+	Email string `json:"email"`
 	jwt.StandardClaims
-}
-
-func genID() quad.IRI {
-	return quad.IRI(fmt.Sprintf("%x", rand.Intn(0xffff)))
 }
 
 // type Admin struct {
