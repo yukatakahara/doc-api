@@ -15,15 +15,18 @@ import (
 	_ "github.com/cayleygraph/cayley/graph/bolt"
 	"github.com/cayleygraph/cayley/quad"
 	"github.com/cayleygraph/cayley/schema"
+	jwt "github.com/dgrijalva/jwt-go"
 )
 
 var dbPath = "/tmp/db.boltdb"
 var ErrBadFormat = errors.New("invalid email format")
 var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 var store *cayley.Handle
+var mySigningKey = []byte("secret")
 
 func init() {
 	store = initializeAndOpenGraph(dbPath)
+	schema.RegisterType("Admin", Admin{})
 }
 
 type Admin struct {
@@ -46,8 +49,9 @@ type EmailAndPassword struct {
 	Password string `json:"password"`
 }
 
-func init() {
-	schema.RegisterType("Admin", Admin{})
+type MyCustomClaims struct {
+	Username string `json:"username"`
+	jwt.StandardClaims
 }
 
 func genID() quad.IRI {

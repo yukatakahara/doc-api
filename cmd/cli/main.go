@@ -126,11 +126,11 @@ func main() {
 
 		Admin.Email = *email2
 
-		// TODO: return Admin struct with jwt
-		err = Admin.Login(*password2)
+		var jwt string
+		jwt, err = Admin.Login(*password2)
 		admin.CheckErr(err)
 
-		fmt.Println("Admin exist")
+		fmt.Println("Admin exist. jwt:", jwt)
 	}
 
 	if addClinic.Parsed() {
