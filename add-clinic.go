@@ -52,12 +52,17 @@ func (a *Admin) AddClinic(c *Clinic, jwt string) error {
 }
 
 func findID(store *cayley.Handle, email string) (string, error) {
+	fmt.Println("email", email)
+
 	p := cayley.StartPath(store).Has(quad.IRI("email"), quad.String(email))
 
 	id, err := p.Iterate(nil).FirstValue(nil)
+	// id, err := p.Iterate(nil).AllValues()
 	if err != nil {
 		return "", err
 	}
+	fmt.Println("id", id)
+
 	return id.(quad.IRI).String(), nil
 }
 
