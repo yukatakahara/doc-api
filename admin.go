@@ -14,6 +14,7 @@ import (
 	"github.com/cayleygraph/cayley/quad"
 	"github.com/cayleygraph/cayley/schema"
 	jwt "github.com/dgrijalva/jwt-go"
+	uuid "github.com/satori/go.uuid"
 )
 
 var dbPath = "/tmp/db.boltdb"
@@ -25,6 +26,9 @@ var mySigningKey = []byte("secret")
 func init() {
 	store = initializeAndOpenGraph(dbPath)
 	schema.RegisterType("Admin", Admin{})
+	schema.GenerateID = func(_ interface{}) quad.Value {
+		return quad.IRI(uuid.NewV1().String())
+	}
 }
 
 type Admin struct {

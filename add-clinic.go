@@ -27,21 +27,18 @@ func (a *Admin) AddClinic(c *Clinic, jwt string) error {
 	// get admin.ID from bolt
 	// var foundAdmin Admin
 	// foundAdmin, err = FindAdmin(store, claim.Email)
-	var id string
-	// id, err = getAdminID(store, claim.Email)
+	var id quad.IRI
 	id, err = findID(store, claim.Email)
 
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("id", id)
-
 	// add ID to clinic
 	err = insert(store, Clinic{
 		Name:      c.Name,
 		Address1:  c.Address1,
-		CreatedBy: "10",
+		CreatedBy: id,
 	})
 
 	if err != nil {
@@ -51,38 +48,15 @@ func (a *Admin) AddClinic(c *Clinic, jwt string) error {
 	return nil
 }
 
-func findID(store *cayley.Handle, email string) (string, error) {
-	fmt.Println("email", email)
-
+func findID(store *cayley.Handle, email string) (quad.IRI, error) {
 	p := cayley.StartPath(store).Has(quad.IRI("email"), quad.String(email))
-
 	id, err := p.Iterate(nil).FirstValue(nil)
-	// id, err := p.Iterate(nil).AllValues()
+
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("id", id)
 
-	return id.(quad.IRI).String(), nil
-}
-
-// func getAdminID(store *cayley.Handle, email string) (string, error) {
-// 	p := cayley.StartPath(store).Has(quad.IRI("email"), quad.String(email)).Tag("id")
-
-// 	err := p.Iterate(nil).TagValues(nil, func(tags map[string]quad.Value) {
-// 		fmt.Println("quad.NativeOf()", quad.NativeOf(tags["id"]).(quad.IRI).String())
-// 	})
-
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	return "test", nil
-// }
-
-// TODO - validate clinic fields
-func validateFields() error {
-	return nil
+	return id.(quad.IRI), nil
 }
 
 func insert(store *cayley.Handle, o interface{}) error {
@@ -114,4 +88,8 @@ func ValidateToken(myToken string) (*MyCustomClaims, error) {
 	claims := token.Claims.(*MyCustomClaims)
 	return claims, nil
 
+}
+
+func validateFields() error {
+	return nil
 }
