@@ -26,7 +26,7 @@ type Message struct {
 }
 
 type MyCustomClaims struct {
-	Username string `json:"username"`
+	Email string `json:"email"`
 	jwt.StandardClaims
 }
 
