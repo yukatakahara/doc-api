@@ -26,6 +26,7 @@ var mySigningKey = []byte("secret")
 func init() {
 	store = initializeAndOpenGraph(dbPath)
 	schema.RegisterType("Admin", Admin{})
+	schema.RegisterType("Clinic", Clinic{})
 	schema.GenerateID = func(_ interface{}) quad.Value {
 		return quad.IRI(uuid.NewV1().String())
 	}

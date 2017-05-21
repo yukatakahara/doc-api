@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cayleygraph/cayley/quad"
 	"github.com/oren/doc-api"
 )
 
@@ -16,6 +17,7 @@ func main() {
 
 	listCommand := flag.NewFlagSet("list-admins", flag.ExitOnError)
 	listClinics := flag.NewFlagSet("list-clinics", flag.ExitOnError)
+	listQuads := flag.NewFlagSet("list-quads", flag.ExitOnError)
 
 	loginAdminCommand := flag.NewFlagSet("login-admin", flag.ExitOnError)
 	email2 := loginAdminCommand.String("email", "", "Admin's email. (Required)")
@@ -43,6 +45,8 @@ func main() {
 		addClinic.Parse(os.Args[2:])
 	case "list-clinics":
 		listClinics.Parse(os.Args[2:])
+	case "list-quads":
+		listQuads.Parse(os.Args[2:])
 	default:
 		flag.PrintDefaults()
 		fmt.Println("Command not found")
@@ -92,6 +96,19 @@ func main() {
 		PrintClinics(results)
 	}
 
+	if listQuads.Parsed() {
+		Admin, err := admin.New()
+
+		if err != nil {
+			panic(err)
+		}
+
+		var quads []quad.Quad
+		quads, err = Admin.AllQuads()
+		admin.CheckErr(err)
+		printQuads(quads)
+	}
+
 	if loginAdminCommand.Parsed() {
 		// Required Flags
 		if *email2 == "" || *password2 == "" {
@@ -132,6 +149,14 @@ func main() {
 	}
 }
 
+func printQuads(quads []quad.Quad) {
+	fmt.Println("\n==== All quads ====")
+
+	for _, q := range quads {
+		fmt.Println("quad", q)
+	}
+}
+
 func PrintAdmins(as []admin.Admin) {
 	fmt.Println("\n==== All admins ====")
 
@@ -147,5 +172,7 @@ func PrintClinics(as []admin.Clinic) {
 	for _, a := range as {
 		fmt.Println("\tName: ", a.Name)
 		fmt.Println("\tAddress1: ", a.Address1)
+		fmt.Println("\tCreated By: ", a.CreatedBy)
+
 	}
 }
