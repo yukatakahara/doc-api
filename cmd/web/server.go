@@ -67,6 +67,14 @@ var doctors = []Doctor{
 func init() {
 	// POST /signup - create jwt
 	http.HandleFunc("/adminlogin", adminLogin)
+
+	// GET /clinics - return all clinics
+	// GET /clinics/1 - return a clinic
+	// POST /clinics - create new clinic
+	// PUT /clinics/1 - update a clinic
+	// DELETE /clinics/1 - delete a clinic
+	http.HandleFunc("/clinics", clinicsHandler)
+
 	http.HandleFunc("/signup", GetTokenHandler)
 	http.HandleFunc("/login", Login)
 	http.HandleFunc("/settings", GetSettingsHandler)
@@ -130,8 +138,52 @@ func ServerError(w http.ResponseWriter, err error) {
 	http.Error(w, err.Error(), http.StatusInternalServerError)
 }
 
-func adminLogin(w http.ResponseWriter, r *http.Request) {
+func clinicsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token, Token, Authorization")
+	w.Header().Set("Content-Type", "application/json")
 
+	if r.Method == "OPTIONS" {
+		ReturnMessageJSON(w, "Information", "", "")
+		return
+	}
+
+	if r.Method != "POST" {
+		ReturnMessageJSON(w, "Error", "Page not available", "GetTokenHandler only accepts a POST")
+		return
+	}
+
+	// validate input
+	// create clinic in bolt
+	Admin, err := admin.New()
+	if err != nil {
+		ReturnMessageJSON(w, "Error", "Authentication Failed", fmt.Sprintf("Error in admin login: %s", err))
+		return
+	}
+
+	tokenHeader, found := r.Header["Authorization"]
+
+	if !found {
+		fmt.Println("not found token header")
+		ReturnMessageJSON(w, "Error", "Authentication Failed", "Create Clinic - no auth token")
+		return
+	}
+
+	jwt := tokenHeader[0]
+	fmt.Println("token", jwt[7:])
+
+	c := &admin.Clinic{}
+	err = Admin.AddClinic(c, jwt)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(nil)
+}
+
+func adminLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
 		ReturnMessageJSON(w, "Information", "", "")
 		return
@@ -393,6 +445,7 @@ func ReturnMessageJSON(w http.ResponseWriter, messageType, userMessage, devMessa
 		panic(err)
 	}
 
+	//TODO: why is the message is not returned?
 	return
 }
 
