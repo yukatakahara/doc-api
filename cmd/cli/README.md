@@ -2,6 +2,7 @@
 As an engineer I want to create a Admin so she can setup clinics.
 
 ```
+go run main.go list-quads
 go run main.go list-admins
 go run main.go list-clinics
 go run main.go add-admin -email vera@gmail.com -password 112233 -name josh
