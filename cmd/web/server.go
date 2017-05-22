@@ -46,23 +46,23 @@ type Doctor struct {
 
 // our 'database' - for now it will be in memory but later on we'll save it in postgres
 // slice that each of it's elements is the Doctor struct
-var doctors = []Doctor{
-	{1, "Novena Medical Center Singapore", "dan@gmail.com", "123", "cats", "10 Sinaran Dr, Singapore 307506", "1.328829", "103.844859", "43.00"},
-	{2, "Central 24-HR Clinic (Clementi)", "laura@gmail.com", "143", "dogs", "Blk 450 Clementi Ave 3 , #01-291, Singapore 120450", "1.320201", "103.764449", "44.00"},
-	{4, "Central 24-HR Clinic (Hougang)", "laura@gmail.com", "143", "dogs", "681 Hougang Avenue 8 #01-831, Singapore 530681", "1.380640", "103.884989", "44.00"},
-	{5, "Central 24-HR Clinic (Bedok)", "laura@gmail.com", "143", "dogs", "Blk 219 Bedok Central #01-124, Singapore 460219", "1.332237", "103.932853", "45.50"},
-	{6, "SingHealth Polyclinics", "laura@gmail.com", "143", "dogs", " 580 Stirling Road, Singapore 148958", "1.305447", "103.802419", "49.00"},
-	{7, "International Medical Clinic", "laura@gmail.com", "143", "dogs", "1 Orchard Boulevard, #14-06 Camden Medical Centre, Singapore 248649", "1.310574", "103.824854", "50.00"},
-	{8, "Central 24-HR Clinic (Jurong West)", "laura@gmail.com", "143", "dogs", "492 Jurong West Street 41, #01-54, Singapore 640492", "1.356569", "103.724055", "50.00"},
-	{9, "Central 24-HR Clinic (Pasir Ris)", "laura@gmail.com", "143", "dogs", "446 Pasir Ris Drive 6 #01-122, Singapore 510446", "1.376433", "103.957140", "50.00"},
-	{10, "Toh Guan Family Clinic", "laura@gmail.com", "143", "dogs", "267A Toh Guan Rd, Singapore 601267", "1.349597", "103.746308", "50.00"},
-	{11, "Healthway Medical Clinic", "laura@gmail.com", "143", "dogs", "267 Compassvale Link #01-04, Singapore 544267", "1.391390", "103.898317", "50.00"},
-	{12, "Thomson 24-Hour Family Clinic", "laura@gmail.com", "143", "dogs", "339 Thomson Rd, Singapore 307677", "1.332861", "103.841544", "50.00"},
-	{13, "Shenton Family Medical Clinic", "laura@gmail.com", "143", "dogs", "201D Tampines Street 21, #01-1137, Singapore 524201", "1.358216", "103.952443", "50.00"},
-	{14, "The Travel Clinic", "laura@gmail.com", "143", "dogs", "Level 4,17, Third Hospital Drive, Diabetes & Metabolism Centre, Singapore 168752", "1.287128", "103.836738", "50.00"},
-	{15, "Dayspring Medical Clinic - Pasir Ris", "laura@gmail.com", "143", "dogs", "1 Pasir Ris Central Street 3, #05-09 White Sands, White Sands, Singapore 518457", "1.372844", "103.949525", "50.00"},
-	{16, "Parkway Shenton Pte Ltd", "laura@gmail.com", "143", "dogs", "20 Bendemeer Rd, Singapore 33991", "1.314670", "103.862142", "50.00"},
-}
+// var doctors = []Doctor{
+// 	{1, "Novena Medical Center Singapore", "dan@gmail.com", "123", "cats", "10 Sinaran Dr, Singapore 307506", "1.328829", "103.844859", "43.00"},
+// 	{2, "Central 24-HR Clinic (Clementi)", "laura@gmail.com", "143", "dogs", "Blk 450 Clementi Ave 3 , #01-291, Singapore 120450", "1.320201", "103.764449", "44.00"},
+// 	{4, "Central 24-HR Clinic (Hougang)", "laura@gmail.com", "143", "dogs", "681 Hougang Avenue 8 #01-831, Singapore 530681", "1.380640", "103.884989", "44.00"},
+// 	{5, "Central 24-HR Clinic (Bedok)", "laura@gmail.com", "143", "dogs", "Blk 219 Bedok Central #01-124, Singapore 460219", "1.332237", "103.932853", "45.50"},
+// 	{6, "SingHealth Polyclinics", "laura@gmail.com", "143", "dogs", " 580 Stirling Road, Singapore 148958", "1.305447", "103.802419", "49.00"},
+// 	{7, "International Medical Clinic", "laura@gmail.com", "143", "dogs", "1 Orchard Boulevard, #14-06 Camden Medical Centre, Singapore 248649", "1.310574", "103.824854", "50.00"},
+// 	{8, "Central 24-HR Clinic (Jurong West)", "laura@gmail.com", "143", "dogs", "492 Jurong West Street 41, #01-54, Singapore 640492", "1.356569", "103.724055", "50.00"},
+// 	{9, "Central 24-HR Clinic (Pasir Ris)", "laura@gmail.com", "143", "dogs", "446 Pasir Ris Drive 6 #01-122, Singapore 510446", "1.376433", "103.957140", "50.00"},
+// 	{10, "Toh Guan Family Clinic", "laura@gmail.com", "143", "dogs", "267A Toh Guan Rd, Singapore 601267", "1.349597", "103.746308", "50.00"},
+// 	{11, "Healthway Medical Clinic", "laura@gmail.com", "143", "dogs", "267 Compassvale Link #01-04, Singapore 544267", "1.391390", "103.898317", "50.00"},
+// 	{12, "Thomson 24-Hour Family Clinic", "laura@gmail.com", "143", "dogs", "339 Thomson Rd, Singapore 307677", "1.332861", "103.841544", "50.00"},
+// 	{13, "Shenton Family Medical Clinic", "laura@gmail.com", "143", "dogs", "201D Tampines Street 21, #01-1137, Singapore 524201", "1.358216", "103.952443", "50.00"},
+// 	{14, "The Travel Clinic", "laura@gmail.com", "143", "dogs", "Level 4,17, Third Hospital Drive, Diabetes & Metabolism Centre, Singapore 168752", "1.287128", "103.836738", "50.00"},
+// 	{15, "Dayspring Medical Clinic - Pasir Ris", "laura@gmail.com", "143", "dogs", "1 Pasir Ris Central Street 3, #05-09 White Sands, White Sands, Singapore 518457", "1.372844", "103.949525", "50.00"},
+// 	{16, "Parkway Shenton Pte Ltd", "laura@gmail.com", "143", "dogs", "20 Bendemeer Rd, Singapore 33991", "1.314670", "103.862142", "50.00"},
+// }
 
 func init() {
 	// POST /signup - create jwt
@@ -94,12 +94,26 @@ func DoctorsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		getDoctors(w, r)
+	case "OPTIONS":
+		getDoctors(w, r)
 	default:
 		http.Error(w, r.Method+" not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
 func getDoctors(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("0000000000000")
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token, Authorization")
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method == "OPTIONS" {
+		ReturnMessageJSON(w, "Information", "", "")
+		return
+	}
+
 	lat := r.URL.Query()["lat"]
 	lon := r.URL.Query()["lon"]
 
@@ -108,23 +122,47 @@ func getDoctors(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("URL", r.URL)
 	}
 
-	// first we build the response
-	res := struct {
-		Doctors []Doctor
-		Errors  []string
-	}{
-		doctors,
-		[]string{""},
+	Admin, err := admin.New()
+	if err != nil {
+		ReturnMessageJSON(w, "Error", "Authentication Failed", fmt.Sprintf("Error in admin login: %s", err))
+		return
+	}
+
+	tokenHeader, found := r.Header["Authorization"]
+
+	if !found {
+		fmt.Println("not found token header")
+		ReturnMessageJSON(w, "Error", "Authentication Failed", "Create Clinic - no auth token")
+		return
+	}
+
+	jwt := tokenHeader[0]
+	var claims *admin.MyCustomClaims
+	claims, err = Admin.Authenticate(jwt[7:])
+	fmt.Println(claims)
+
+	if err != nil {
+		fmt.Println("Error in Auth", err)
+		ReturnMessageJSON(w, "Error", "Authentication Failed", "Create Clinic - error with token")
+		return
+	}
+
+	var clinics []admin.Clinic
+	clinics, err = Admin.AllClinics()
+	if err != nil {
+		fmt.Println("1111")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Add("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	// then we encode it as JSON on the response
-	enc := json.NewEncoder(w)
-	err := enc.Encode(res)
+	err = json.NewEncoder(w).Encode(clinics)
 
 	// And if encoding fails we log the error
 	if err != nil {
+		fmt.Println("2222")
 		fmt.Errorf("encode response: %v", err)
 	}
 }
