@@ -12,27 +12,22 @@ import (
 )
 
 // TODO: validation
-func (a *Admin) AddClinic(c *Clinic, jwt string) error {
-	err := validateFields()
-	if err != nil {
-		return err
-	}
-
-	claim, err := ValidateToken(jwt)
-
-	if err != nil {
-		return err
+func (a *Admin) AddClinic(c *Clinic, email string) error {
+	if !validateFields(c) {
+		return fmt.Errorf("Clinic fields are not valid")
 	}
 
 	// get admin.ID from bolt
 	// var foundAdmin Admin
 	// foundAdmin, err = FindAdmin(store, claim.Email)
-	var id quad.IRI
-	id, err = findID(store, claim.Email)
+	// var id quad.IRI
+	id, err := findAdminID(store, email)
 
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("clinic", c)
 
 	// add ID to clinic
 	err = insert(store, Clinic{
@@ -48,7 +43,7 @@ func (a *Admin) AddClinic(c *Clinic, jwt string) error {
 	return nil
 }
 
-func findID(store *cayley.Handle, email string) (quad.IRI, error) {
+func findAdminID(store *cayley.Handle, email string) (quad.IRI, error) {
 	p := cayley.StartPath(store).Has(quad.IRI("email"), quad.String(email))
 	id, err := p.Iterate(nil).FirstValue(nil)
 
@@ -64,10 +59,6 @@ func insert(store *cayley.Handle, o interface{}) error {
 	defer qw.Close() // don't forget to close a writer; it has some internal buffering
 	_, err := schema.WriteAsQuads(qw, o)
 	return err
-}
-
-func getEmail(jwt string) (string, error) {
-	return "foobar@gmail.com", nil
 }
 
 //ValidateToken will validate the token and return the claims
@@ -90,6 +81,10 @@ func ValidateToken(myToken string) (*MyCustomClaims, error) {
 
 }
 
-func validateFields() error {
-	return nil
+func validateFields(c *Clinic) bool {
+	if c.Name == "" || c.Address1 == "" {
+		return false
+	}
+
+	return true
 }

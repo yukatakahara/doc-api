@@ -50,6 +50,11 @@ type EmailAndPassword struct {
 	Password string `json:"password"`
 }
 
+type NewClinic struct {
+	Name     string `json:"name"`
+	Address1 string `json:"address1"`
+}
+
 type MyCustomClaims struct {
 	Email string `json:"email"`
 	jwt.StandardClaims

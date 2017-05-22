@@ -141,7 +141,8 @@ func ServerError(w http.ResponseWriter, err error) {
 func clinicsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token, Token, Authorization")
+	w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token, Authorization")
+
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method == "OPTIONS" {
@@ -154,7 +155,8 @@ func clinicsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// validate input
+	// authenticate admin
+	// validate clinic input
 	// create clinic in bolt
 	Admin, err := admin.New()
 	if err != nil {
@@ -171,16 +173,49 @@ func clinicsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jwt := tokenHeader[0]
-	fmt.Println("token", jwt[7:])
+	var claims *admin.MyCustomClaims
+	claims, err = Admin.Authenticate(jwt[7:])
 
-	c := &admin.Clinic{}
-	err = Admin.AddClinic(c, jwt)
+	if err != nil {
+		fmt.Println("Error in Auth", err)
+		ReturnMessageJSON(w, "Error", "Authentication Failed", "Create Clinic - error with token")
+		return
+	}
+
+	newClinic := &admin.NewClinic{}
+
+	if err := json.NewDecoder(r.Body).Decode(newClinic); err != nil {
+		fmt.Println("1", err)
+		ReturnMessageJSON(w, "Error", "Error with decoding of clinic", "Error with decoding of clinic")
+		return
+	}
+
+	fmt.Println("newClinic", newClinic)
+
+	if newClinic.Name == "" || newClinic.Address1 == "" {
+		fmt.Println("2", err)
+		ReturnMessageJSON(w, "Error", "Invalid Clinic fields", "Invalid Clinic fields")
+		return
+	}
+
+	c := &admin.Clinic{
+		Name:     newClinic.Name,
+		Address1: newClinic.Address1,
+	}
+	err = Admin.AddClinic(c, claims.Email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Write(nil)
+	js, err := json.Marshal(claims)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
 
 func adminLogin(w http.ResponseWriter, r *http.Request) {
@@ -429,7 +464,7 @@ func ValidateToken(myToken string) (bool, string) {
 func ReturnMessageJSON(w http.ResponseWriter, messageType, userMessage, devMessage string) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token")
+	w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token, Authorization")
 	w.Header().Set("Content-Type", "application/json")
 
 	message := Message{Type: messageType, UserMessage: userMessage, DeveloperMessage: devMessage}
@@ -441,6 +476,8 @@ func ReturnMessageJSON(w http.ResponseWriter, messageType, userMessage, devMessa
 	}
 
 	err := json.NewEncoder(w).Encode(message)
+	fmt.Println("after Encoding")
+
 	if err != nil {
 		panic(err)
 	}
