@@ -28,7 +28,7 @@ func main() {
 	clinicName := addClinic.String("name", "", "Clinic's name. (Required)")
 	clinicAddress1 := addClinic.String("address1", "", "Clinic's address. (Required)")
 
-	// deleteClinicCmd := flag.NewFlagSet("delete-clinic", flag.ExitOnError)
+	deleteClinicCmd := flag.NewFlagSet("delete-clinic", flag.ExitOnError)
 
 	// os.Arg[1] will be the subcommand
 	if len(os.Args) < 2 {
@@ -49,8 +49,8 @@ func main() {
 		listClinics.Parse(os.Args[2:])
 	case "list-quads":
 		listQuads.Parse(os.Args[2:])
-	// case "delete-clinic":
-	// deleteClinic2(deleteClinicCmd)
+	case "delete-clinic":
+		DeleteClinic(deleteClinicCmd)
 	default:
 		flag.PrintDefaults()
 		fmt.Println("Command not found")
