@@ -2,18 +2,23 @@ package admin
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/graph"
 	"github.com/cayleygraph/cayley/quad"
 	"github.com/cayleygraph/cayley/schema"
-	jwt "github.com/dgrijalva/jwt-go"
 )
 
 // TODO: validation
-func (a *Admin) AddClinic(c *Clinic, email string) error {
-	if !validateFields(c) {
+func (a *Admin) AddClinic(c *Clinic, jwt string) error {
+	claims, err := validateToken(jwt)
+	if err != nil {
+		return fmt.Errorf("Admin token is invalid")
+	}
+
+	fmt.Println("claims", claims)
+
+	if !validateClinicFields(c) {
 		return fmt.Errorf("Clinic fields are not valid")
 	}
 
@@ -21,13 +26,11 @@ func (a *Admin) AddClinic(c *Clinic, email string) error {
 	// var foundAdmin Admin
 	// foundAdmin, err = FindAdmin(store, claim.Email)
 	// var id quad.IRI
-	id, err := findAdminID(store, email)
+	id, err := findAdminID(store, claims.Email)
 
 	if err != nil {
 		return err
 	}
-
-	fmt.Println("clinic", c)
 
 	// add ID to clinic
 	err = insert(store, Clinic{
@@ -61,30 +64,30 @@ func insert(store *cayley.Handle, o interface{}) error {
 	return err
 }
 
-//ValidateToken will validate the token and return the claims
-func ValidateToken(myToken string) (*MyCustomClaims, error) {
-	token, err := jwt.ParseWithClaims(myToken, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(mySigningKey), nil
-	})
-
-	if err != nil {
-		log.Println("Invalid token.", token)
-		return nil, err
-	}
-
-	if !token.Valid {
-		return nil, fmt.Errorf("JWT invalid")
-	}
-
-	claims := token.Claims.(*MyCustomClaims)
-	return claims, nil
-
-}
-
-func validateFields(c *Clinic) bool {
+func validateClinicFields(c *Clinic) bool {
 	if c.Name == "" || c.Address1 == "" {
 		return false
 	}
 
 	return true
 }
+
+//ValidateToken will validate the token and return the claims
+// func validateToken(myToken string) (*MyCustomClaims, error) {
+// 	token, err := jwt.ParseWithClaims(myToken, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+// 		return []byte(mySigningKey), nil
+// 	})
+
+// 	if err != nil {
+// 		log.Println("Invalid token.", token)
+// 		return nil, err
+// 	}
+
+// 	if !token.Valid {
+// 		return nil, fmt.Errorf("JWT invalid")
+// 	}
+
+// 	claims := token.Claims.(*MyCustomClaims)
+
+// 	return claims, nil
+// }
