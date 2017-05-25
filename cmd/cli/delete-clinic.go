@@ -7,7 +7,7 @@ import (
 	"github.com/oren/doc-api"
 )
 
-func deleteClinic2(cmd *flag.FlagSet) {
+func DeleteClinic(cmd *flag.FlagSet) {
 	jwt := cmd.String("jwt", "", "Admin's JWT. (Required)")
 	id := cmd.String("id", "", "Clinic's Id. (Required)")
 
