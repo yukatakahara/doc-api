@@ -11,9 +11,6 @@ import (
 
 func main() {
 	addCommand := flag.NewFlagSet("add-admin", flag.ExitOnError)
-	email := addCommand.String("email", "", "Admin's email. (Required)")
-	password := addCommand.String("password", "", "Admin's password. (Required)")
-	name := addCommand.String("name", "", "Admin's name. (Required)")
 
 	listCommand := flag.NewFlagSet("list-admins", flag.ExitOnError)
 	listClinics := flag.NewFlagSet("list-clinics", flag.ExitOnError)
@@ -38,7 +35,7 @@ func main() {
 
 	switch os.Args[1] {
 	case "add-admin":
-		addCommand.Parse(os.Args[2:])
+		AddAdmin(addCommand)
 	case "list-admins":
 		listCommand.Parse(os.Args[2:])
 	case "login-admin":
@@ -55,25 +52,6 @@ func main() {
 		flag.PrintDefaults()
 		fmt.Println("Command not found")
 		os.Exit(1)
-	}
-
-	if addCommand.Parsed() {
-		// Required Flags
-		if *email == "" || *password == "" || *name == "" {
-			addCommand.PrintDefaults()
-			os.Exit(1)
-		}
-
-		Admin, err := admin.New()
-		if err != nil {
-			panic(err)
-		}
-
-		Admin.Email = *email
-		Admin.Name = *name
-
-		err = Admin.Create(*password)
-		admin.CheckErr(err)
 	}
 
 	if listCommand.Parsed() {
@@ -180,26 +158,3 @@ func PrintClinics(as []admin.Clinic) {
 
 	}
 }
-
-// func DeleteClinic(cmd *flag.FlagSet) {
-// 	jwt := cmd.String("jwt", "", "Admin's JWT. (Required)")
-// 	id := cmd.String("id", "", "Clinic's Id. (Required)")
-
-// 	cmd.Parse(os.Args[2:])
-
-// 	if cmd.Parsed() {
-// 		// Required Flags
-// 		if *jwt == "" || *id == "" {
-// 			cmd.PrintDefaults()
-// 			os.Exit(1)
-// 		}
-
-// 		Admin, err := admin.New()
-// 		if err != nil {
-// 			panic(err)
-// 		}
-
-// 		err = Admin.DeleteClinic(*jwt, *id)
-// 		admin.CheckErr(err)
-// 	}
-// }
