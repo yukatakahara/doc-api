@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cayleygraph/cayley/quad"
 	"github.com/oren/doc-api"
 )
 
@@ -43,26 +42,13 @@ func main() {
 	case "list-clinics":
 		ListClinics(listClinics)
 	case "list-quads":
-		listQuads.Parse(os.Args[2:])
+		ListQuads(listQuads)
 	case "delete-clinic":
 		DeleteClinic(deleteClinicCmd)
 	default:
 		flag.PrintDefaults()
 		fmt.Println("Command not found")
 		os.Exit(1)
-	}
-
-	if listQuads.Parsed() {
-		Admin, err := admin.New()
-
-		if err != nil {
-			panic(err)
-		}
-
-		var quads []quad.Quad
-		quads, err = Admin.AllQuads()
-		admin.CheckErr(err)
-		printQuads(quads)
 	}
 
 	if loginAdminCommand.Parsed() {
@@ -102,13 +88,5 @@ func main() {
 		}
 		err = Admin.AddClinic(clinic, *adminJWT)
 		admin.CheckErr(err)
-	}
-}
-
-func printQuads(quads []quad.Quad) {
-	fmt.Println("\n==== All quads ====")
-
-	for _, q := range quads {
-		fmt.Println("quad", q)
 	}
 }
