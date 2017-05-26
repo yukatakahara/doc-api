@@ -102,7 +102,7 @@ func DoctorsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getDoctors(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("0000000000000")
+	fmt.Println("in getDoctors")
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
@@ -114,13 +114,13 @@ func getDoctors(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lat := r.URL.Query()["lat"]
-	lon := r.URL.Query()["lon"]
+	// lat := r.URL.Query()["lat"]
+	// lon := r.URL.Query()["lon"]
 
-	if lat != nil && lon != nil {
-		// order the list of doctors based on proximity
-		fmt.Println("URL", r.URL)
-	}
+	// if lat != nil && lon != nil {
+	// 	// order the list of doctors based on proximity
+	// 	fmt.Println("URL", r.URL)
+	// }
 
 	Admin, err := admin.New()
 	if err != nil {
@@ -136,9 +136,14 @@ func getDoctors(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("in getDoctors 1")
+
 	jwt := tokenHeader[0]
+	// if no jwt, return 401 - not authorized
+	fmt.Println("in getDoctors 2", jwt)
 	var claims *admin.MyCustomClaims
 	claims, err = Admin.Authenticate(jwt[7:])
+	fmt.Println("in getDoctors 3")
 	fmt.Println(claims)
 
 	if err != nil {
@@ -150,7 +155,6 @@ func getDoctors(w http.ResponseWriter, r *http.Request) {
 	var clinics []admin.Clinic
 	clinics, err = Admin.AllClinics()
 	if err != nil {
-		fmt.Println("1111")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -211,6 +215,7 @@ func clinicsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jwt := tokenHeader[0]
+	fmt.Println("jwt", jwt)
 	var claims *admin.MyCustomClaims
 	claims, err = Admin.Authenticate(jwt[7:])
 
@@ -517,7 +522,8 @@ func ReturnMessageJSON(w http.ResponseWriter, messageType, userMessage, devMessa
 	fmt.Println("after Encoding")
 
 	if err != nil {
-		panic(err)
+		fmt.Println("error in Encoding", err)
+		// panic(err)
 	}
 
 	//TODO: why is the message is not returned?

@@ -1,6 +1,8 @@
 package admin
 
 import (
+	"fmt"
+
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/schema"
 )
@@ -10,6 +12,7 @@ func (a *Admin) AllClinics() ([]Clinic, error) {
 	As, err := readAllClinics(store)
 
 	if err != nil {
+		fmt.Println("2222")
 		return []Clinic{}, err
 	}
 

@@ -10,13 +10,8 @@ import (
 )
 
 // TODO: validation
-func (a *Admin) AddClinic(c *Clinic, jwt string) error {
-	claims, err := validateToken(jwt)
-	if err != nil {
-		return fmt.Errorf("Admin token is invalid")
-	}
-
-	fmt.Println("claims", claims)
+func (a *Admin) AddClinic(c *Clinic, email string) error {
+	fmt.Println("email", email)
 
 	if !validateClinicFields(c) {
 		return fmt.Errorf("Clinic fields are not valid")
@@ -26,7 +21,7 @@ func (a *Admin) AddClinic(c *Clinic, jwt string) error {
 	// var foundAdmin Admin
 	// foundAdmin, err = FindAdmin(store, claim.Email)
 	// var id quad.IRI
-	id, err := findAdminID(store, claims.Email)
+	id, err := findAdminID(store, email)
 
 	if err != nil {
 		return err
