@@ -301,6 +301,11 @@ func adminLogin(w http.ResponseWriter, r *http.Request) {
 	var jwt string
 
 	jwt, err = Admin.Login(a.Password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
 	user := User{a.Email, jwt}
 	js, err := json.Marshal(user)
 
