@@ -2,7 +2,7 @@
 
 ### Admin Login
 
-    curl -v -H "Accept: application/json" -H "Content-type: application/json" POST -d '{"email":"foo@gmail.com","password":"password123"}' "http://localhost:3000/adminlogin"
+    curl -v -H "Accept: application/json" -H "Content-type: application/json" POST -d '{"email":"vera@gmail.com","password":"112233"}' "http://localhost:3000/adminlogin"
 
 ### Create Clinic
 
@@ -18,7 +18,7 @@
 
 ### Get Clinics
 
-    curl -v -H "Accept: application/json" -H "Content-type: application/json" "http://localhost:3000/doctors?lat=1.298653&lon=103.848456"
+    curl -v -H "Authorization: Bearer verylongtokenstring" -H "Accept: application/json" -H "Content-type: application/json" "http://localhost:3000/doctors?lat=1.298653&lon=103.848456"
 
 ### Get User Settings
 
