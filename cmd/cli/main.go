@@ -11,11 +11,9 @@ import (
 
 func main() {
 	addCommand := flag.NewFlagSet("add-admin", flag.ExitOnError)
-
 	listCommand := flag.NewFlagSet("list-admins", flag.ExitOnError)
 	listClinics := flag.NewFlagSet("list-clinics", flag.ExitOnError)
 	listQuads := flag.NewFlagSet("list-quads", flag.ExitOnError)
-
 	loginAdminCommand := flag.NewFlagSet("login-admin", flag.ExitOnError)
 	email2 := loginAdminCommand.String("email", "", "Admin's email. (Required)")
 	password2 := loginAdminCommand.String("password", "", "Admin's password. (Required)")
@@ -37,13 +35,13 @@ func main() {
 	case "add-admin":
 		AddAdmin(addCommand)
 	case "list-admins":
-		listCommand.Parse(os.Args[2:])
+		ListAdmins(listCommand)
 	case "login-admin":
 		loginAdminCommand.Parse(os.Args[2:])
 	case "add-clinic":
 		addClinic.Parse(os.Args[2:])
 	case "list-clinics":
-		listClinics.Parse(os.Args[2:])
+		ListClinics(listClinics)
 	case "list-quads":
 		listQuads.Parse(os.Args[2:])
 	case "delete-clinic":
@@ -52,30 +50,6 @@ func main() {
 		flag.PrintDefaults()
 		fmt.Println("Command not found")
 		os.Exit(1)
-	}
-
-	if listCommand.Parsed() {
-		Admin, err := admin.New()
-
-		if err != nil {
-			panic(err)
-		}
-
-		results, err := Admin.All()
-		admin.CheckErr(err)
-		PrintAdmins(results)
-	}
-
-	if listClinics.Parsed() {
-		Admin, err := admin.New()
-
-		if err != nil {
-			panic(err)
-		}
-
-		results, err := Admin.AllClinics()
-		admin.CheckErr(err)
-		PrintClinics(results)
 	}
 
 	if listQuads.Parsed() {
@@ -136,25 +110,5 @@ func printQuads(quads []quad.Quad) {
 
 	for _, q := range quads {
 		fmt.Println("quad", q)
-	}
-}
-
-func PrintAdmins(as []admin.Admin) {
-	fmt.Println("\n==== All admins ====")
-
-	for _, a := range as {
-		fmt.Println("\tEmail: ", a.Email)
-		fmt.Println("\tHashedPassword: ", a.HashedPassword)
-	}
-}
-
-func PrintClinics(as []admin.Clinic) {
-	fmt.Println("\n==== All clinics ====")
-
-	for _, a := range as {
-		fmt.Println("\tName: ", a.Name)
-		fmt.Println("\tAddress1: ", a.Address1)
-		fmt.Println("\tCreated By: ", a.CreatedBy)
-
 	}
 }
