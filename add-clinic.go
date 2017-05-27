@@ -11,8 +11,6 @@ import (
 
 // TODO: validation
 func (a *Admin) AddClinic(c *Clinic, email string) error {
-	fmt.Println("email", email)
-
 	if !validateClinicFields(c) {
 		return fmt.Errorf("Clinic fields are not valid")
 	}
