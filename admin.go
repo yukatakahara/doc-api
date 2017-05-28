@@ -4,10 +4,7 @@ package admin
 // or use a service structure
 
 import (
-	"errors"
 	"log"
-	"path/filepath"
-	"regexp"
 
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/graph"
@@ -19,14 +16,9 @@ import (
 )
 
 // var dbPath = "C:/Users/Alan/Projects/data/db.boltdb"
-var dbPath = "/tmp/db.boltdb"
-var ErrBadFormat = errors.New("invalid email format")
-var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-var store *cayley.Handle
-var mySigningKey = []byte("secret")
+var MySigningKey = []byte("secret")
 
 func init() {
-	store = initializeAndOpenGraph(filepath.FromSlash(dbPath))
 	schema.RegisterType("Admin", Admin{})
 	schema.RegisterType("Clinic", Clinic{})
 	schema.GenerateID = func(_ interface{}) quad.Value {
@@ -39,6 +31,7 @@ type Admin struct {
 	Email          string `json:"email" quad:"email"`
 	HashedPassword string `json:"hashedPassword"  quad:"hashed_password"`
 	LoggedIn       bool
+	Store          *cayley.Handle
 }
 
 type Clinic struct {
@@ -68,8 +61,9 @@ func CheckErr(err error) {
 	}
 }
 
-func New() (*Admin, error) {
+func New(store *cayley.Handle) (*Admin, error) {
 	a := &Admin{}
+	a.Store = store
 	a.LoggedIn = false
 
 	return a, nil

@@ -2,10 +2,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/oren/doc-api"
+	"github.com/oren/doc-api/bolt"
 	"github.com/oren/doc-api/config"
 )
 
@@ -17,29 +18,36 @@ func AddAdmin(cmd *flag.FlagSet) {
 
 	cmd.Parse(os.Args[2:])
 
-	if cmd.Parsed() {
-		// Required Flags
-		if *email == "" || *password == "" || *name == "" {
-			cmd.PrintDefaults()
-			os.Exit(1)
-		}
-
-		Admin, err := admin.New()
-		if err != nil {
-			panic(err)
-		}
-
-		if *configPath == "" {
-			*configPath = "/tmp/config.json"
-		}
-
-		configuration := config.ReadConf(*configPath)
-		fmt.Println(configuration)
-
-		Admin.Email = *email
-		Admin.Name = *name
-
-		err = Admin.Create(*password)
-		admin.CheckErr(err)
+	if !cmd.Parsed() {
+		return
 	}
+
+	// Required Flags
+	if *email == "" || *password == "" || *name == "" {
+		cmd.PrintDefaults()
+		os.Exit(1)
+	}
+
+	if *configPath == "" {
+		*configPath = config.GetPathOfConfig()
+
+	}
+
+	configuration := config.ReadConf(*configPath)
+
+	store, err := bolt.Open(configuration.DbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	Admin, err := admin.New(store)
+	if err != nil {
+		panic(err)
+	}
+
+	Admin.Email = *email
+	Admin.Name = *name
+
+	err = Admin.Create(*password)
+	admin.CheckErr(err)
 }

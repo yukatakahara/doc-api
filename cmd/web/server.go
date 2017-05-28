@@ -3,12 +3,16 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"math"
 	"net/http"
 
+	"github.com/cayleygraph/cayley"
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/oren/doc-api/bolt"
+	"github.com/oren/doc-api/config"
 )
 
 // Message struct represents the JSON document which the API sends when something wrong will happen.
@@ -28,9 +32,31 @@ type MyCustomClaims struct {
 	jwt.StandardClaims
 }
 
-var mySigningKey = []byte("secret")
+var store *cayley.Handle
 
 func init() {
+	// initialize the db
+	configPath := flag.String("config", "", "Path to config.json")
+
+	flag.Parse()
+
+	if *configPath == "" {
+		*configPath = config.GetPathOfConfig()
+	}
+
+	configuration := config.ReadConf(*configPath)
+
+	var err error
+	store, err = bolt.Open(configuration.DbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// defer db.Close()
+
+	// // Create services.
+	// us := &postgres.UserService{DB: db}
+
 	// POST /signup - create jwt
 	http.HandleFunc("/adminlogin", adminLogin)
 	// GET /clinics - return all clinics

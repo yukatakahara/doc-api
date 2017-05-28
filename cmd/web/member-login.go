@@ -7,6 +7,7 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/oren/doc-api"
 )
 
 func memberLogin(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +44,7 @@ func memberLogin(w http.ResponseWriter, r *http.Request) {
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 		/* Sign the token with our secret */
-		tokenString, err := token.SignedString(mySigningKey)
+		tokenString, err := token.SignedString(admin.MySigningKey)
 		if err != nil {
 			log.Println("Something went wrong with signing token")
 			ReturnMessageJSON(w, "Error", "Authentication Failed", "Authentication Failed")

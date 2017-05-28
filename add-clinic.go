@@ -19,14 +19,14 @@ func (a *Admin) AddClinic(c *Clinic, email string) error {
 	// var foundAdmin Admin
 	// foundAdmin, err = FindAdmin(store, claim.Email)
 	// var id quad.IRI
-	id, err := findAdminID(store, email)
+	id, err := findAdminID(a.Store, email)
 
 	if err != nil {
 		return err
 	}
 
 	// add ID to clinic
-	err = insert(store, Clinic{
+	err = insert(a.Store, Clinic{
 		Name:      c.Name,
 		Address1:  c.Address1,
 		CreatedBy: id,

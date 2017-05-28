@@ -1,6 +1,9 @@
 package admin
 
 import (
+	"errors"
+	"regexp"
+
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/graph"
 	"github.com/cayleygraph/cayley/schema"
@@ -27,7 +30,7 @@ func (a *Admin) Create(password string) error {
 	// t.AddQuad(quad.Make(quad.IRI(uuid), quad.IRI("email"), quad.String(a.Email), nil))
 	// t.AddQuad(quad.Make(quad.IRI(uuid), quad.IRI("hashed_password"), quad.String(a.HashedPassword), nil))
 	// err = store.ApplyTransaction(t)
-	err = Insert(store, Admin{
+	err = Insert(a.Store, Admin{
 		Name:           a.Name,
 		Email:          a.Email,
 		HashedPassword: a.HashedPassword,
@@ -41,6 +44,9 @@ func (a *Admin) Create(password string) error {
 }
 
 func validateEmail(email string) error {
+	var ErrBadFormat = errors.New("invalid email format")
+	var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+
 	if !emailRegexp.MatchString(email) {
 		return ErrBadFormat
 	}

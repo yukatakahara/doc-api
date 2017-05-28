@@ -37,7 +37,7 @@ func adminLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Admin, err := admin.New()
+	Admin, err := admin.New(store)
 	if err != nil {
 		ReturnMessageJSON(w, "Error", "Authentication Failed", fmt.Sprintf("Error in admin login: %s", err))
 		return

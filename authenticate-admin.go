@@ -22,7 +22,7 @@ func (a *Admin) Authenticate(jwt string) (*MyCustomClaims, error) {
 func validateToken(myToken string) (*MyCustomClaims, error) {
 	fmt.Println("token", myToken)
 	token, err := jwt.ParseWithClaims(myToken, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(mySigningKey), nil
+		return []byte(MySigningKey), nil
 	})
 
 	if err != nil {

@@ -15,7 +15,7 @@ import (
 
 func (a *Admin) Login(password string) (string, error) {
 	// find admin in the db based on email
-	adminFound, err := FindAdmin(store, a.Email)
+	adminFound, err := FindAdmin(a.Store, a.Email)
 
 	if err != nil {
 		return "", err
@@ -63,7 +63,7 @@ func generateJWT(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	/* Sign the token with our secret */
-	tokenString, err := token.SignedString(mySigningKey)
+	tokenString, err := token.SignedString(MySigningKey)
 	if err != nil {
 		return "", fmt.Errorf("Error while signing a jwt")
 	}

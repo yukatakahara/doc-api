@@ -7,7 +7,7 @@ import (
 
 // get all quads from the db
 func (a *Admin) AllQuads() ([]quad.Quad, error) {
-	results, err := readAllQuads(store)
+	results, err := readAllQuads(a.Store)
 
 	if err != nil {
 		return results, err

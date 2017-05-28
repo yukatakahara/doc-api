@@ -7,7 +7,7 @@ import (
 
 // get admins from the db
 func (a *Admin) All() ([]Admin, error) {
-	As, err := readAllAdmins(store)
+	As, err := readAllAdmins(a.Store)
 
 	if err != nil {
 		return []Admin{}, err

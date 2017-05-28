@@ -3,10 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/cayleygraph/cayley/quad"
 	"github.com/oren/doc-api"
+	"github.com/oren/doc-api/bolt"
 	"github.com/oren/doc-api/config"
 )
 
@@ -19,14 +21,17 @@ func ListQuads(cmd *flag.FlagSet) {
 	}
 
 	if *configPath == "" {
-		*configPath = getPathOfConfig()
+		*configPath = config.GetPathOfConfig()
 	}
 
 	configuration := config.ReadConf(*configPath)
-	fmt.Println(configuration)
 
-	// TODO: pass configuration.DbPath
-	Admin, err := admin.New()
+	store, err := bolt.Open(configuration.DbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	Admin, err := admin.New(store)
 
 	if err != nil {
 		panic(err)
