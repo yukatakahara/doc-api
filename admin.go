@@ -18,7 +18,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-var dbPath = "C:/Users/Alan/Projects/data/db.boltdb"
+// var dbPath = "C:/Users/Alan/Projects/data/db.boltdb"
+var dbPath = "/tmp/db.boltdb"
 var ErrBadFormat = errors.New("invalid email format")
 var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 var store *cayley.Handle
