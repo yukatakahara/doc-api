@@ -12,18 +12,17 @@ type Configuration struct {
 }
 
 func ReadConf(path string) Configuration {
-	file, _ := os.Open(path)
+	file, err := os.Open(path)
+	if err != nil {
+		log.Fatal("Error opening the configuration file: ", err)
+	}
+
 	decoder := json.NewDecoder(file)
 	configuration := Configuration{}
-	err := decoder.Decode(&configuration)
-
+	err = decoder.Decode(&configuration)
 	if err != nil {
-		log.Fatal("Error reading the configuration file: ", err)
+		log.Fatal("Error decoding the configuration file: ", err)
 	}
 
 	return configuration
 }
-
-//$ web --config /path/to/config.json
-//$ cli --config /path/to/config.json
-// $HOME/.config/$PROJECT/config.json

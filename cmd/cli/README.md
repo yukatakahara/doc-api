@@ -3,7 +3,7 @@ As an engineer I want to create a Admin so she can setup clinics.
 
 ```
 go build
-./cli list-quads
+./cli list-quads [-config /tmp/config.json]
 ./cli list-admins
 ./cli list-clinics
 ./cli add-admin -email vera@gmail.com -password 112233 -name vera

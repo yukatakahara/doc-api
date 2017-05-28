@@ -22,7 +22,7 @@ func ListQuads(cmd *flag.FlagSet) {
 		}
 
 		if *configPath == "" {
-			*configPath = "/tmp/config.json"
+			*configPath = getPathOfConfig()
 		}
 
 		configuration := config.ReadConf(*configPath)
