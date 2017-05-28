@@ -1,3 +1,5 @@
 tags
 doc-api
 cmd/cli/cli.exe
+cmd/cli/cli
+cmd/web/web
