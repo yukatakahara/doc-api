@@ -23,6 +23,7 @@ func ListQuads(cmd *flag.FlagSet) {
 	}
 
 	configuration := config.ReadConf(*configPath)
+	fmt.Println(configuration)
 
 	// TODO: pass configuration.DbPath
 	Admin, err := admin.New()
