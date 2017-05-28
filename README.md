@@ -5,13 +5,15 @@
 ```
 cd cmd/cli
 go build
+./cli
 ```
 
 ## Web
 
 ```
 cd cmd/web
-go run server.go
+go build
+./server
 ```
 
 ## Setup
