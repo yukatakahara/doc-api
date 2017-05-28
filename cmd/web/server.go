@@ -32,6 +32,7 @@ type MyCustomClaims struct {
 	jwt.StandardClaims
 }
 
+// TODO: store should not be global
 var store *cayley.Handle
 
 func init() {
@@ -52,8 +53,11 @@ func init() {
 		log.Fatal(err)
 	}
 
+	// TODO: When do i close the db?
 	// defer db.Close()
 
+	// TODO: What about interface?
+	// https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1
 	// // Create services.
 	// us := &postgres.UserService{DB: db}
 
