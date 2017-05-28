@@ -34,6 +34,13 @@ type Admin struct {
 	Store          *cayley.Handle
 }
 
+type AdminService interface {
+	// Admin(id int) (*Admin, error)
+	// Admins() ([]*Admin, error)
+	CreateAdmin(u *Admin, password string) error
+	// DeleteAdmin(id int) error
+}
+
 type Clinic struct {
 	Name      string   `json:"name" quad:"name"`
 	Address1  string   `json:"address" quad:"address"`

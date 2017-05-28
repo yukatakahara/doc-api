@@ -35,6 +35,8 @@ type MyCustomClaims struct {
 // TODO: store should not be global
 var store *cayley.Handle
 
+// var adminService admin.AdminService
+
 func init() {
 	// initialize the db
 	configPath := flag.String("config", "", "Path to config.json")
@@ -53,13 +55,14 @@ func init() {
 		log.Fatal(err)
 	}
 
+	// Create admin service
+	// adminService = &bolt.AdminService{Store: store}
+
 	// TODO: When do i close the db?
 	// defer db.Close()
 
 	// TODO: What about interface?
 	// https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1
-	// // Create services.
-	// us := &postgres.UserService{DB: db}
 
 	// POST /signup - create jwt
 	http.HandleFunc("/adminlogin", adminLogin)

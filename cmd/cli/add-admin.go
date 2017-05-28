@@ -30,24 +30,22 @@ func AddAdmin(cmd *flag.FlagSet) {
 
 	if *configPath == "" {
 		*configPath = config.GetPathOfConfig()
-
 	}
 
 	configuration := config.ReadConf(*configPath)
 
 	store, err := bolt.Open(configuration.DbPath)
+
+	// Create admin service
+	adminService := &bolt.AdminService{Store: store}
+	newAdmin := &admin.Admin{
+		Name:  *name,
+		Email: *email,
+	}
+
+	err = adminService.CreateAdmin(newAdmin, *password)
+
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	Admin, err := admin.New(store)
-	if err != nil {
-		panic(err)
-	}
-
-	Admin.Email = *email
-	Admin.Name = *name
-
-	err = Admin.Create(*password)
-	admin.CheckErr(err)
 }
