@@ -62,15 +62,6 @@ type MyCustomClaims struct {
 	jwt.StandardClaims
 }
 
-// type Admin struct {
-// 	ID             string `json:"id"`
-// 	Email          string `json:"email"`
-// 	Password       string `json:"password"`
-// 	HashedPassword string `json:"hashedPassword"`
-// 	Name           string `json:"name"`
-// 	LoggedIn       bool
-// }
-
 func CheckErr(err error) {
 	if err != nil {
 		log.Fatal(err)

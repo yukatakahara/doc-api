@@ -14,25 +14,27 @@ func ListQuads(cmd *flag.FlagSet) {
 	configPath := cmd.String("config", "", "Config file (Optional)")
 	cmd.Parse(os.Args[2:])
 
-	if cmd.Parsed() {
-		Admin, err := admin.New()
-
-		if err != nil {
-			panic(err)
-		}
-
-		if *configPath == "" {
-			*configPath = getPathOfConfig()
-		}
-
-		configuration := config.ReadConf(*configPath)
-		fmt.Println(configuration)
-
-		var quads []quad.Quad
-		quads, err = Admin.AllQuads()
-		admin.CheckErr(err)
-		printQuads(quads)
+	if !cmd.Parsed() {
+		return
 	}
+
+	if *configPath == "" {
+		*configPath = getPathOfConfig()
+	}
+
+	configuration := config.ReadConf(*configPath)
+
+	// TODO: pass configuration.DbPath
+	Admin, err := admin.New()
+
+	if err != nil {
+		panic(err)
+	}
+
+	var quads []quad.Quad
+	quads, err = Admin.AllQuads()
+	admin.CheckErr(err)
+	printQuads(quads)
 }
 
 func printQuads(quads []quad.Quad) {
