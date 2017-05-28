@@ -6,6 +6,9 @@ import (
 	"os"
 )
 
+func init() {
+}
+
 func main() {
 	addCommand := flag.NewFlagSet("add-admin", flag.ExitOnError)
 	listCommand := flag.NewFlagSet("list-admins", flag.ExitOnError)

@@ -6,9 +6,11 @@ import (
 	"os"
 
 	"github.com/oren/doc-api"
+	"github.com/oren/doc-api/config"
 )
 
 func ListAdmins(cmd *flag.FlagSet) {
+	configPath := cmd.String("config", "", "Config file (Optional)")
 	cmd.Parse(os.Args[2:])
 
 	if cmd.Parsed() {
@@ -17,6 +19,13 @@ func ListAdmins(cmd *flag.FlagSet) {
 		if err != nil {
 			panic(err)
 		}
+
+		if *configPath == "" {
+			*configPath = "/tmp/config.json"
+		}
+
+		configuration := config.ReadConf(*configPath)
+		fmt.Println(configuration)
 
 		results, err := Admin.All()
 		admin.CheckErr(err)

@@ -2,25 +2,28 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"os"
 )
 
 type Configuration struct {
-	Users  []string
-	Groups []string
+	WebPort string
+	DbPath  string
 }
 
-func ReadConf() {
-	file, _ := os.Open("conf.json")
-	fmt.Println("file", file)
+func ReadConf(path string) Configuration {
+	file, _ := os.Open(path)
 	decoder := json.NewDecoder(file)
 	configuration := Configuration{}
-	err = decoder.Decode(&configuration)
+	err := decoder.Decode(&configuration)
+
 	if err != nil {
-		fmt.Println("Error reading the configuration file:", err)
+		log.Fatal("Error reading the configuration file: ", err)
 	}
-	fmt.Println(configuration.Users) // output: [UserA, UserB]
+
+	return configuration
 }
 
-// config.File(&conf, configPathFlagWhithSaneDefault).
+//$ web --config /path/to/config.json
+//$ cli --config /path/to/config.json
+// $HOME/.config/$PROJECT/config.json
