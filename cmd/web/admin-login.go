@@ -8,15 +8,15 @@ import (
 )
 
 func adminLogin(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "OPTIONS" {
-		ReturnMessageJSON(w, "Information", "", "")
-		return
-	}
-
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token")
 	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method == "OPTIONS" {
+		ReturnMessageJSON(w, "Information", "", "")
+		return
+	}
 
 	if r.Method != "POST" {
 		ReturnMessageJSON(w, "Error", "Page not available", "GetTokenHandler only accepts a POST")
