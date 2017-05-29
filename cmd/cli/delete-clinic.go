@@ -11,7 +11,7 @@ import (
 
 func DeleteClinic(cmd *flag.FlagSet) {
 	configPath := cmd.String("config", "", "Config file (Optional)")
-	jwt := cmd.String("jwt", "", "Admin's JWT. (Required)")
+	adminJWT := cmd.String("jwt", "", "Admin's JWT. (Required)")
 	id := cmd.String("id", "", "Clinic's Id. (Required)")
 
 	cmd.Parse(os.Args[2:])
@@ -21,7 +21,7 @@ func DeleteClinic(cmd *flag.FlagSet) {
 	}
 
 	// Required Flags
-	if *jwt == "" || *id == "" {
+	if *adminJWT == "" || *id == "" {
 		cmd.PrintDefaults()
 		os.Exit(1)
 	}
@@ -39,7 +39,13 @@ func DeleteClinic(cmd *flag.FlagSet) {
 
 	// Create admin service
 	adminService := &bolt.AdminService{Store: store}
-	err = adminService.DeleteClinic(*jwt, *id)
+
+	_, err = adminService.Authenticate(*adminJWT)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = adminService.DeleteClinic(*id)
 
 	if err != nil {
 		log.Fatal(err)
