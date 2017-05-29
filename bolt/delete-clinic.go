@@ -1,8 +1,8 @@
-package admin
+package bolt
 
 import "github.com/cayleygraph/cayley/quad"
 
-func (a *Admin) DeleteClinic(jwt string, id string) error {
+func (a *AdminService) DeleteClinic(jwt string, id string) error {
 	idIRI := quad.IRI(id)
 
 	err := a.Store.RemoveNode(idIRI)

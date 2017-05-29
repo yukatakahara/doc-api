@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/oren/doc-api"
 	"github.com/oren/doc-api/bolt"
 	"github.com/oren/doc-api/config"
 )
@@ -38,12 +37,13 @@ func DeleteClinic(cmd *flag.FlagSet) {
 		log.Fatal(err)
 	}
 
-	Admin, err := admin.New(store)
+	// Create admin service
+	adminService := &bolt.AdminService{Store: store}
+	err = adminService.DeleteClinic(*jwt, *id)
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	err = Admin.DeleteClinic(*jwt, *id)
-	admin.CheckErr(err)
+	// TODO: is there a way to tell if it was deleted?
 }
