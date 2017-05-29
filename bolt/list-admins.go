@@ -1,24 +1,24 @@
-package admin
+package bolt
 
 import (
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/schema"
+	"github.com/oren/doc-api"
 )
 
-// get admins from the db
-func (a *Admin) All() ([]Admin, error) {
+func (a *AdminService) All() ([]admin.Admin, error) {
 	As, err := readAllAdmins(a.Store)
 
 	if err != nil {
-		return []Admin{}, err
+		return []admin.Admin{}, err
 	}
 
 	return As, nil
 }
 
-func readAllAdmins(store *cayley.Handle) ([]Admin, error) {
+func readAllAdmins(store *cayley.Handle) ([]admin.Admin, error) {
 	// get all admins
-	var admins []Admin
+	var admins []admin.Admin
 	err := schema.LoadTo(nil, store, &admins)
 
 	return admins, err

@@ -39,6 +39,7 @@ type AdminService interface {
 	Login(password string) (string, error)
 	Authenticate(jwt string) (MyCustomClaims, error)
 	AddClinic(c *Clinic, email string) error
+	All() ([]Admin, error)
 	// Admin(id int) (*Admin, error)
 	// Admins() ([]*Admin, error)
 	// DeleteAdmin(id int) error
