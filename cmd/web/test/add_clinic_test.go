@@ -3,8 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"testing"
 
@@ -15,19 +13,30 @@ import (
 // expect 200
 // POST /clinics
 // expect 200
-func TestLogin(t *testing.T) {
+func TestAddClinic(t *testing.T) {
+	email := "vera@gmail.com"
+	password := "112233"
 	name := "a nice place"
 	address1 := "2323 hesting road, singapore"
-	jwt := login(t)
-	fmt.Println("jwt", jwt)
+
+	jwt := login(t, email, password)
 	addClinic(t, jwt, name, address1)
 }
 
-func login(t *testing.T) string {
+func login(t *testing.T, email string, password string) string {
 	url := "http://localhost:3000/adminlogin"
 
-	var jsonStr = []byte(`{"email":"vera@gmail.com", "password":"112233"}`)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	adminLogin := &admin.EmailAndPassword{
+		Email:    email,
+		Password: password,
+	}
+
+	js, err := json.Marshal(adminLogin)
+	if err != nil {
+		panic(err)
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(js))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
@@ -43,7 +52,7 @@ func login(t *testing.T) string {
 		return ""
 	}
 
-	user := admin.User{}
+	user := &admin.User{}
 	dec := json.NewDecoder(resp.Body)
 	err = dec.Decode(&user)
 	if err != nil {
@@ -58,8 +67,17 @@ func login(t *testing.T) string {
 func addClinic(t *testing.T, jwt string, name string, address1 string) {
 	url := "http://localhost:3000/clinics"
 
-	var jsonStr = []byte(`{"name":name, "address1":address1}`)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	newClinic := &admin.NewClinic{
+		Name:     name,
+		Address1: address1,
+	}
+
+	js, err := json.Marshal(newClinic)
+	if err != nil {
+		panic(err)
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(js))
 	req.Header.Set("Authorization", "Bearer "+jwt)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
@@ -74,9 +92,6 @@ func addClinic(t *testing.T, jwt string, name string, address1 string) {
 	if resp.Status == "200 OK" {
 		return
 	}
-
-	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("response Body:", string(body))
 
 	t.Fatal("POST /clinics returned", resp.Status)
 }
