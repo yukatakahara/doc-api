@@ -47,16 +47,5 @@ func LoginAdmin(cmd *flag.FlagSet) {
 		log.Fatal(err)
 	}
 
-	// Admin, err := admin.New(store)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// Admin.Email = *email
-
-	// var jwt string
-	// jwt, err = Admin.Login(*password)
-	// admin.CheckErr(err)
-
 	fmt.Println("Admin exist. jwt:", jwt)
 }

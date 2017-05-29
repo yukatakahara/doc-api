@@ -35,6 +35,9 @@ func AddAdmin(cmd *flag.FlagSet) {
 	configuration := config.ReadConf(*configPath)
 
 	store, err := bolt.Open(configuration.DbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create admin service
 	adminService := &bolt.AdminService{Store: store}

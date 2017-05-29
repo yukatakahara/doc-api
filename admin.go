@@ -35,8 +35,10 @@ type Admin struct {
 }
 
 type AdminService interface {
-	CreateAdmin(u *Admin, password string) error
+	CreateAdmin(a *Admin, password string) error
 	Login(password string) (string, error)
+	Authenticate(jwt string) (MyCustomClaims, error)
+	AddClinic(c *Clinic, email string) error
 	// Admin(id int) (*Admin, error)
 	// Admins() ([]*Admin, error)
 	// DeleteAdmin(id int) error
