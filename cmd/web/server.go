@@ -64,6 +64,7 @@ func main() {
 
 	// TODO: When do i close the db?
 	// defer db.Close()
+
 	// POST /signup - create jwt
 	http.HandleFunc("/adminlogin", adminLogin)
 	// GET /clinics - return all clinics
@@ -72,7 +73,6 @@ func main() {
 	// PUT /clinics/1 - update a clinic
 	// DELETE /clinics/1 - delete a clinic
 	http.HandleFunc("/clinics", clinicsHandler)
-	// http.HandleFunc("/doctors", DoctorsHandler)
 	// http.HandleFunc("/login", memberLogin)
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
