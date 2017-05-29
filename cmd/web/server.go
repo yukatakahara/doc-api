@@ -63,7 +63,7 @@ func main() {
 	adminService = &bolt.AdminService{Store: store}
 
 	// TODO: When do i close the db?
-	// defer db.Close()
+	defer store.Close()
 
 	// POST /signup - create jwt
 	http.HandleFunc("/adminlogin", adminLogin)
