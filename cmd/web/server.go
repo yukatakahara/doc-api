@@ -35,6 +35,7 @@ type MyCustomClaims struct {
 // TODO: store should not be global
 var store *cayley.Handle
 var adminService *bolt.AdminService
+var configuration config.Configuration
 
 // var adminService admin.AdminService
 
@@ -48,8 +49,10 @@ func init() {
 		*configPath = config.GetPathOfConfig()
 	}
 
-	configuration := config.ReadConf(*configPath)
+	configuration = config.ReadConf(*configPath)
+}
 
+func main() {
 	var err error
 	store, err = bolt.Open(configuration.DbPath)
 	if err != nil {
@@ -59,15 +62,8 @@ func init() {
 	// Create admin service
 	adminService = &bolt.AdminService{Store: store}
 
-	// Create admin service
-	// adminService = &bolt.AdminService{Store: store}
-
 	// TODO: When do i close the db?
 	// defer db.Close()
-
-	// TODO: What about interface?
-	// https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1
-
 	// POST /signup - create jwt
 	http.HandleFunc("/adminlogin", adminLogin)
 	// GET /clinics - return all clinics
@@ -79,9 +75,6 @@ func init() {
 	// http.HandleFunc("/doctors", DoctorsHandler)
 	// http.HandleFunc("/login", memberLogin)
 	log.Fatal(http.ListenAndServe(":3000", nil))
-}
-
-func main() {
 }
 
 func ServerError(w http.ResponseWriter, err error) {
