@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/oren/doc-api"
@@ -28,29 +29,26 @@ func clinicsHandler(w http.ResponseWriter, r *http.Request) {
 	// authenticate admin
 	// validate clinic input
 	// create clinic in bolt
-	Admin, err := admin.New(store)
-	if err != nil {
-		ReturnMessageJSON(w, "Error", "Authentication Failed", fmt.Sprintf("Error in admin login: %s", err))
-		return
-	}
 
 	tokenHeader, found := r.Header["Authorization"]
 
 	if !found {
-		fmt.Println("not found token header")
 		ReturnMessageJSON(w, "Error", "Authentication Failed", "Create Clinic - no auth token")
 		return
 	}
 
 	jwt := tokenHeader[0]
 	fmt.Println("jwt", jwt)
-	var claims *admin.MyCustomClaims
-	claims, err = Admin.Authenticate(jwt[7:])
+	// var claims *admin.MyCustomClaims
 
+	claims, err := adminService.Authenticate(jwt[7:])
 	if err != nil {
-		fmt.Println("Error in Auth", err)
 		ReturnMessageJSON(w, "Error", "Authentication Failed", "Create Clinic - error with token")
 		return
+	}
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	newClinic := &admin.NewClinic{}
@@ -60,8 +58,6 @@ func clinicsHandler(w http.ResponseWriter, r *http.Request) {
 		ReturnMessageJSON(w, "Error", "Error with decoding of clinic", "Error with decoding of clinic")
 		return
 	}
-
-	fmt.Println("newClinic", newClinic)
 
 	if newClinic.Name == "" || newClinic.Address1 == "" {
 		fmt.Println("2", err)
@@ -73,7 +69,8 @@ func clinicsHandler(w http.ResponseWriter, r *http.Request) {
 		Name:     newClinic.Name,
 		Address1: newClinic.Address1,
 	}
-	err = Admin.AddClinic(c, claims.Email)
+
+	err = adminService.AddClinic(c, claims.Email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

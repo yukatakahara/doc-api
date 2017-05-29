@@ -75,18 +75,13 @@ func init() {
 	// POST /clinics - create new clinic
 	// PUT /clinics/1 - update a clinic
 	// DELETE /clinics/1 - delete a clinic
-	// http.HandleFunc("/clinics", clinicsHandler)
+	http.HandleFunc("/clinics", clinicsHandler)
 	// http.HandleFunc("/doctors", DoctorsHandler)
 	// http.HandleFunc("/login", memberLogin)
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
 func main() {
-}
-
-type User struct {
-	Email string `json:"email"`
-	JWT   string `json:"jwt"`
 }
 
 func ServerError(w http.ResponseWriter, err error) {

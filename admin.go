@@ -66,6 +66,12 @@ type MyCustomClaims struct {
 	jwt.StandardClaims
 }
 
+// used for returning the login endpoint
+type User struct {
+	Email string `json:"email"`
+	JWT   string `json:"jwt"`
+}
+
 func CheckErr(err error) {
 	if err != nil {
 		log.Fatal(err)
