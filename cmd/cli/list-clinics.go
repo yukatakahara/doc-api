@@ -30,13 +30,15 @@ func ListClinics(cmd *flag.FlagSet) {
 		log.Fatal(err)
 	}
 
-	Admin, err := admin.New(store)
+	// Create admin service
+	adminService := &bolt.AdminService{Store: store}
+	var results []admin.Clinic
+	results, err = adminService.AllClinics()
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	results, err := Admin.AllClinics()
 	admin.CheckErr(err)
 	printClinics(results)
 }
