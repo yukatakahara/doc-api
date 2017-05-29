@@ -53,15 +53,15 @@ func clinicsHandler(w http.ResponseWriter, r *http.Request) {
 
 	newClinic := &admin.NewClinic{}
 
-	if err := json.NewDecoder(r.Body).Decode(newClinic); err != nil {
-		fmt.Println("1", err)
-		ReturnMessageJSON(w, "Error", "Error with decoding of clinic", "Error with decoding of clinic")
+	err = json.NewDecoder(r.Body).Decode(newClinic)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if newClinic.Name == "" || newClinic.Address1 == "" {
-		fmt.Println("2", err)
-		ReturnMessageJSON(w, "Error", "Invalid Clinic fields", "Invalid Clinic fields")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

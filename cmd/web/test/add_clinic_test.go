@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"testing"
 
@@ -61,6 +62,7 @@ func addClinic(t *testing.T, jwt string, name string, address1 string) {
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("Authorization", "Bearer "+jwt)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -72,6 +74,9 @@ func addClinic(t *testing.T, jwt string, name string, address1 string) {
 	if resp.Status == "200 OK" {
 		return
 	}
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("response Body:", string(body))
 
 	t.Fatal("POST /clinics returned", resp.Status)
 }
