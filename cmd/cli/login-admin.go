@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/oren/doc-api"
 	"github.com/oren/doc-api/bolt"
 	"github.com/oren/doc-api/config"
 )
@@ -38,16 +37,26 @@ func LoginAdmin(cmd *flag.FlagSet) {
 		log.Fatal(err)
 	}
 
-	Admin, err := admin.New(store)
+	// Create admin service
+	adminService := &bolt.AdminService{Store: store}
+
+	var jwt string
+	jwt, err = adminService.Login(*password, *email)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	Admin.Email = *email
+	// Admin, err := admin.New(store)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	var jwt string
-	jwt, err = Admin.Login(*password)
-	admin.CheckErr(err)
+	// Admin.Email = *email
+
+	// var jwt string
+	// jwt, err = Admin.Login(*password)
+	// admin.CheckErr(err)
 
 	fmt.Println("Admin exist. jwt:", jwt)
 }

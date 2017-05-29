@@ -35,9 +35,10 @@ type Admin struct {
 }
 
 type AdminService interface {
+	CreateAdmin(u *Admin, password string) error
+	Login(password string) (string, error)
 	// Admin(id int) (*Admin, error)
 	// Admins() ([]*Admin, error)
-	CreateAdmin(u *Admin, password string) error
 	// DeleteAdmin(id int) error
 }
 
