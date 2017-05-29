@@ -15,7 +15,6 @@ func TestLogin(t *testing.T) {
 
 	var jsonStr = []byte(`{"email":"vera@gmail.com", "password":"112233"}`)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
-	req.Header.Set("X-Custom-Header", "myvalue")
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
