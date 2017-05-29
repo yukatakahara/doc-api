@@ -37,21 +37,26 @@ func adminLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Admin, err := admin.New(store)
-	if err != nil {
-		ReturnMessageJSON(w, "Error", "Authentication Failed", fmt.Sprintf("Error in admin login: %s", err))
-		return
-	}
+	jwt, err := adminService.Login(a.Password, a.Email)
 
-	Admin.Email = a.Email
-
-	var jwt string
-
-	jwt, err = Admin.Login(a.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
+
+	// Admin, err := admin.New(store)
+	// if err != nil {
+	// 	ReturnMessageJSON(w, "Error", "Authentication Failed", fmt.Sprintf("Error in admin login: %s", err))
+	// 	return
+	// }
+
+	// Admin.Email = a.Email
+
+	// jwt, err = Admin.Login(a.Password)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusUnauthorized)
+	// 	return
+	// }
 
 	user := User{a.Email, jwt}
 	js, err := json.Marshal(user)

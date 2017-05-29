@@ -34,6 +34,7 @@ type MyCustomClaims struct {
 
 // TODO: store should not be global
 var store *cayley.Handle
+var adminService *bolt.AdminService
 
 // var adminService admin.AdminService
 
@@ -56,6 +57,9 @@ func init() {
 	}
 
 	// Create admin service
+	adminService = &bolt.AdminService{Store: store}
+
+	// Create admin service
 	// adminService = &bolt.AdminService{Store: store}
 
 	// TODO: When do i close the db?
@@ -71,9 +75,9 @@ func init() {
 	// POST /clinics - create new clinic
 	// PUT /clinics/1 - update a clinic
 	// DELETE /clinics/1 - delete a clinic
-	http.HandleFunc("/clinics", clinicsHandler)
-	http.HandleFunc("/doctors", DoctorsHandler)
-	http.HandleFunc("/login", memberLogin)
+	// http.HandleFunc("/clinics", clinicsHandler)
+	// http.HandleFunc("/doctors", DoctorsHandler)
+	// http.HandleFunc("/login", memberLogin)
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
