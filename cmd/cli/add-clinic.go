@@ -31,7 +31,6 @@ func AddClinic(cmd *flag.FlagSet) {
 
 	if *configPath == "" {
 		*configPath = config.GetPathOfConfig()
-
 	}
 
 	configuration := config.ReadConf(*configPath)
@@ -41,15 +40,10 @@ func AddClinic(cmd *flag.FlagSet) {
 		log.Fatal(err)
 	}
 
-	Admin, err := admin.New(store)
-
-	if err != nil {
-		panic(err)
-	}
+	adminService := &bolt.AdminService{Store: store}
 
 	var claims *admin.MyCustomClaims
-	claims, err = Admin.Authenticate(*adminJWT)
-
+	claims, err = adminService.Authenticate(*adminJWT)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,7 +53,11 @@ func AddClinic(cmd *flag.FlagSet) {
 		Address1: *clinicAddress1,
 	}
 
-	err = Admin.AddClinic(clinic, claims.Email)
-	admin.CheckErr(err)
+	err = adminService.AddClinic(clinic, claims.Email)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	fmt.Println("Clinic was added")
 }

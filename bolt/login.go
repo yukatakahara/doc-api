@@ -1,4 +1,4 @@
-package admin
+package bolt
 
 import (
 	"fmt"
@@ -9,13 +9,13 @@ import (
 	"github.com/cayleygraph/cayley/quad"
 	"github.com/cayleygraph/cayley/schema"
 	jwt "github.com/dgrijalva/jwt-go"
-
+	"github.com/oren/doc-api"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (a *Admin) Login(password string) (string, error) {
+func (a *AdminService) Login(password string, email string) (string, error) {
 	// find admin in the db based on email
-	adminFound, err := FindAdmin(a.Store, a.Email)
+	adminFound, err := FindAdmin(a.Store, email)
 
 	if err != nil {
 		return "", err
@@ -39,8 +39,8 @@ func checkPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func FindAdmin(store *cayley.Handle, email string) (Admin, error) {
-	var a Admin
+func FindAdmin(store *cayley.Handle, email string) (admin.Admin, error) {
+	var a admin.Admin
 	p := path.StartPath(store).Has(quad.IRI("email"), quad.String(email))
 	err := schema.LoadPathTo(nil, store, &a, p)
 
@@ -53,7 +53,7 @@ func FindAdmin(store *cayley.Handle, email string) (Admin, error) {
 
 func generateJWT(email string) (string, error) {
 	// Create the Claim which expires after EXPIRATION_HOURS hrs, default is 5.
-	claims := MyCustomClaims{
+	claims := admin.MyCustomClaims{
 		email,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 5).Unix(),
@@ -63,7 +63,7 @@ func generateJWT(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	/* Sign the token with our secret */
-	tokenString, err := token.SignedString(MySigningKey)
+	tokenString, err := token.SignedString(admin.MySigningKey)
 	if err != nil {
 		return "", fmt.Errorf("Error while signing a jwt")
 	}

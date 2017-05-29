@@ -5,14 +5,13 @@ import (
 	"log"
 	"os"
 
-	"github.com/oren/doc-api"
 	"github.com/oren/doc-api/bolt"
 	"github.com/oren/doc-api/config"
 )
 
 func DeleteClinic(cmd *flag.FlagSet) {
 	configPath := cmd.String("config", "", "Config file (Optional)")
-	jwt := cmd.String("jwt", "", "Admin's JWT. (Required)")
+	adminJWT := cmd.String("jwt", "", "Admin's JWT. (Required)")
 	id := cmd.String("id", "", "Clinic's Id. (Required)")
 
 	cmd.Parse(os.Args[2:])
@@ -22,7 +21,7 @@ func DeleteClinic(cmd *flag.FlagSet) {
 	}
 
 	// Required Flags
-	if *jwt == "" || *id == "" {
+	if *adminJWT == "" || *id == "" {
 		cmd.PrintDefaults()
 		os.Exit(1)
 	}
@@ -38,12 +37,19 @@ func DeleteClinic(cmd *flag.FlagSet) {
 		log.Fatal(err)
 	}
 
-	Admin, err := admin.New(store)
+	// Create admin service
+	adminService := &bolt.AdminService{Store: store}
 
+	_, err = adminService.Authenticate(*adminJWT)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	err = Admin.DeleteClinic(*jwt, *id)
-	admin.CheckErr(err)
+	err = adminService.DeleteClinic(*id)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// TODO: is there a way to tell if it was deleted?
 }

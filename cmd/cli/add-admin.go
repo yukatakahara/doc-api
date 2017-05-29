@@ -30,7 +30,6 @@ func AddAdmin(cmd *flag.FlagSet) {
 
 	if *configPath == "" {
 		*configPath = config.GetPathOfConfig()
-
 	}
 
 	configuration := config.ReadConf(*configPath)
@@ -40,14 +39,16 @@ func AddAdmin(cmd *flag.FlagSet) {
 		log.Fatal(err)
 	}
 
-	Admin, err := admin.New(store)
-	if err != nil {
-		panic(err)
+	// Create admin service
+	adminService := &bolt.AdminService{Store: store}
+	newAdmin := &admin.Admin{
+		Name:  *name,
+		Email: *email,
 	}
 
-	Admin.Email = *email
-	Admin.Name = *name
+	err = adminService.CreateAdmin(newAdmin, *password)
 
-	err = Admin.Create(*password)
-	admin.CheckErr(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

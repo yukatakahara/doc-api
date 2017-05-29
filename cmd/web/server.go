@@ -34,6 +34,10 @@ type MyCustomClaims struct {
 
 // TODO: store should not be global
 var store *cayley.Handle
+var adminService *bolt.AdminService
+var configuration config.Configuration
+
+// var adminService admin.AdminService
 
 func init() {
 	// initialize the db
@@ -45,21 +49,21 @@ func init() {
 		*configPath = config.GetPathOfConfig()
 	}
 
-	configuration := config.ReadConf(*configPath)
+	configuration = config.ReadConf(*configPath)
+}
 
+func main() {
 	var err error
 	store, err = bolt.Open(configuration.DbPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Create admin service
+	adminService = &bolt.AdminService{Store: store}
+
 	// TODO: When do i close the db?
 	// defer db.Close()
-
-	// TODO: What about interface?
-	// https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1
-	// // Create services.
-	// us := &postgres.UserService{DB: db}
 
 	// POST /signup - create jwt
 	http.HandleFunc("/adminlogin", adminLogin)
@@ -69,17 +73,8 @@ func init() {
 	// PUT /clinics/1 - update a clinic
 	// DELETE /clinics/1 - delete a clinic
 	http.HandleFunc("/clinics", clinicsHandler)
-	http.HandleFunc("/doctors", DoctorsHandler)
-	http.HandleFunc("/login", memberLogin)
+	// http.HandleFunc("/login", memberLogin)
 	log.Fatal(http.ListenAndServe(":3000", nil))
-}
-
-func main() {
-}
-
-type User struct {
-	Email string `json:"email"`
-	JWT   string `json:"jwt"`
 }
 
 func ServerError(w http.ResponseWriter, err error) {

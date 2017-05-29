@@ -34,6 +34,18 @@ type Admin struct {
 	Store          *cayley.Handle
 }
 
+type AdminService interface {
+	CreateAdmin(a *Admin, password string) error
+	Login(password string) (string, error)
+	Authenticate(jwt string) (MyCustomClaims, error)
+	AddClinic(c *Clinic, email string) error
+	All() ([]Admin, error)
+	AllClinics() ([]Clinic, error)
+	// Admin(id int) (*Admin, error)
+	// Admins() ([]*Admin, error)
+	// DeleteAdmin(id int) error
+}
+
 type Clinic struct {
 	Name      string   `json:"name" quad:"name"`
 	Address1  string   `json:"address" quad:"address"`
@@ -53,6 +65,12 @@ type NewClinic struct {
 type MyCustomClaims struct {
 	Email string `json:"email"`
 	jwt.StandardClaims
+}
+
+// used for returning the login endpoint
+type User struct {
+	Email string `json:"email"`
+	JWT   string `json:"jwt"`
 }
 
 func CheckErr(err error) {

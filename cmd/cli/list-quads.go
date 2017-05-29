@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/cayleygraph/cayley/quad"
-	"github.com/oren/doc-api"
 	"github.com/oren/doc-api/bolt"
 	"github.com/oren/doc-api/config"
 )
@@ -31,18 +30,19 @@ func ListQuads(cmd *flag.FlagSet) {
 		log.Fatal(err)
 	}
 
-	Admin, err := admin.New(store)
+	// var quads []interface{}
+	var quads []quad.Quad
+	adminService := &bolt.AdminService{Store: store}
+	quads, err = adminService.Quads()
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	var quads []quad.Quad
-	quads, err = Admin.AllQuads()
-	admin.CheckErr(err)
 	printQuads(quads)
 }
 
+// func printQuads(quads []interface{}) {
 func printQuads(quads []quad.Quad) {
 	fmt.Println("\n==== All quads ====")
 

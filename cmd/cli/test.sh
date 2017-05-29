@@ -1,9 +1,10 @@
 #!/bin/sh
 
-go run main.go add-admin -email vera@gmail.com -password 112233 -name josh
-# go run main.go login-admin -email vera@gmail.com -password 112233
-# go run main.go add-clinic -name "great place" -address1 "4 Leng Kee Road" -jwt
+./cli add-admin -email vera@gmail.com -password 112233 -name vera
+./cli login-admin -email vera@gmail.com -password 112233
+./cli list-quads
+./cli list-admins
+./cli list-clinics
+# ./cli add-clinic -name "great place" -address1 "4 Leng Kee Road" -jwt 111
+# ./cli delete-clinic -id 111 -jwt 111
 
-go run main.go list-quads
-go run main.go list-admins
-go run main.go list-clinics

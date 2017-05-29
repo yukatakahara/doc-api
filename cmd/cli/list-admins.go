@@ -29,15 +29,15 @@ func ListAdmins(cmd *flag.FlagSet) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	Admin, err := admin.New(store)
+	// Create admin service
+	adminService := &bolt.AdminService{Store: store}
+	var results []admin.Admin
+	results, err = adminService.All()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	results, err := Admin.All()
-	admin.CheckErr(err)
 	printAdmins(results)
 }
 

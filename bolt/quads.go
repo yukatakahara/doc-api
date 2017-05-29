@@ -1,4 +1,4 @@
-package admin
+package bolt
 
 import (
 	"github.com/cayleygraph/cayley"
@@ -6,7 +6,8 @@ import (
 )
 
 // get all quads from the db
-func (a *Admin) AllQuads() ([]quad.Quad, error) {
+// func (a *AdminService) Quads() ([]interface{}, error) {
+func (a *AdminService) Quads() ([]quad.Quad, error) {
 	results, err := readAllQuads(a.Store)
 
 	if err != nil {
